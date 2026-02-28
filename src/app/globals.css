@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Instrument+Sans:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --border: #e4e1db;
+  --accent: #4338ca;
+}
+
+html { font-size: 15px; }
+
+body {
+  background-color: #f7f6f3;
+  background-image: radial-gradient(circle, #ccc8bf 1px, transparent 1px);
+  background-size: 22px 22px;
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+.font-heading {
+  font-family: 'Fraunces', Georgia, serif;
+}
