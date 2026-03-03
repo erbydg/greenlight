@@ -1,26 +1,25 @@
-// src/lib/supabase.ts
-
 import { createClient } from '@supabase/supabase-js'
 import type { Deal } from '@/types/deal'
 
-function getClient() {
+function getServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 }
 
-export async function getAllDeals(): Promise<Deal[]> {
-  const { data, error } = await getClient()
+export async function getAllDeals(agencyId: string): Promise<Deal[]> {
+  const { data, error } = await getServiceClient()
     .from('deals')
     .select('*')
+    .eq('agency_id', agencyId)
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return data as Deal[]
 }
 
 export async function getDealById(id: string): Promise<Deal | null> {
-  const { data, error } = await getClient()
+  const { data, error } = await getServiceClient()
     .from('deals')
     .select('*')
     .eq('id', id)
@@ -30,7 +29,7 @@ export async function getDealById(id: string): Promise<Deal | null> {
 }
 
 export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
-  const { data, error } = await getClient()
+  const { data, error } = await getServiceClient()
     .from('deals')
     .insert(deal)
     .select()
@@ -40,7 +39,7 @@ export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
 }
 
 export async function updateDeal(id: string, updates: Partial<Deal>): Promise<Deal> {
-  const { data, error } = await getClient()
+  const { data, error } = await getServiceClient()
     .from('deals')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)

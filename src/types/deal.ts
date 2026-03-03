@@ -1,9 +1,19 @@
-// src/types/deal.ts
-
 export interface TeamRole {
   role: string
   hourlyCost: number
   monthlyHours: number
+  mode?: 'quick' | 'team'
+  memberId?: string
+  memberName?: string
+  monthlyCost?: number
+  allocationPercent?: number
+}
+
+export interface TeamMember {
+  id: string
+  name: string
+  role: string
+  monthly_cost: number
 }
 
 export interface Deliverables {
@@ -22,12 +32,15 @@ export interface Deal {
   id: string
   created_at: string
   updated_at: string
+  agency_id: string
   status: DealStatus
   client_name: string
   industry: string
   contract_duration: number
   monthly_retainer: number
   setup_fee: number
+  ad_spend: number
+  ad_spend_through_agency: boolean
   team_roles: TeamRole[]
   deliverables: Deliverables
   kpi_promises: string[]
@@ -53,6 +66,8 @@ export interface DealFormData {
   contract_duration: number
   monthly_retainer: number
   setup_fee: number
+  ad_spend: number
+  ad_spend_through_agency: boolean
   team_roles: TeamRole[]
   deliverables: Deliverables
   kpi_promises: string[]

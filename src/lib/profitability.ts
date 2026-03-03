@@ -1,46 +1,62 @@
-// src/lib/profitability.ts
-// ⚠️ Geen AI hier. Alleen wiskunde en regels.
-
 import type { DealFormData, ProfitabilityResult, RiskLevel } from '@/types/deal'
 
 export function calculateProfitability(inputs: DealFormData): ProfitabilityResult {
-  // 1. Interne kosten
-  const total_monthly_cost = inputs.team_roles.reduce(
-    (sum, role) => sum + role.hourlyCost * role.monthlyHours, 0
-  )
+  const team_cost = inputs.team_roles.reduce((sum, role) => {
+    if (role.mode === 'team') {
+      return sum + (role.monthlyCost || 0) * (role.allocationPercent || 0) / 100
+    }
+    return sum + role.hourlyCost * role.monthlyHours
+  }, 0)
 
-  // 2. Marge
+  // Ad spend alleen aftrekken als het door de agency loopt
+  const ad_cost = inputs.ad_spend_through_agency ? (inputs.ad_spend || 0) : 0
+  const total_monthly_cost = team_cost + ad_cost
+
   const gross_margin = inputs.monthly_retainer - total_monthly_cost
   const margin_percent = inputs.monthly_retainer > 0
     ? (gross_margin / inputs.monthly_retainer) * 100
     : 0
 
-  // 3. Contract totalen
   const projected_contract_value =
     inputs.monthly_retainer * inputs.contract_duration + inputs.setup_fee
   const total_projected_profit = gross_margin * inputs.contract_duration
 
-  // 4. Risico regels
+  const setup_fee_monthly = inputs.contract_duration > 0
+    ? (inputs.setup_fee || 0) / inputs.contract_duration
+    : 0
+  const effective_monthly_margin = gross_margin + setup_fee_monthly
+  const effective_margin_percent = inputs.monthly_retainer > 0
+    ? (effective_monthly_margin / (inputs.monthly_retainer + setup_fee_monthly)) * 100
+    : margin_percent
+
   const flags: string[] = []
   let riskScore = 0
 
-  if (margin_percent < 0) {
-    flags.push('❌ VERLIESLATEND: interne kosten overschrijden retainer')
+  if (margin_percent < 0 && effective_margin_percent < 0) {
+    flags.push('❌ LOSS-MAKING: internal costs exceed retainer + setup fee')
     riskScore += 40
-  } else if (margin_percent < 20) {
-    flags.push('⚠️ Gevaarlijk lage marge (<20%) — nauwelijks buffer')
+  } else if (margin_percent < 0 && effective_margin_percent >= 0) {
+    flags.push('⚠️ Monthly retainer is loss-making — profitable only due to setup fee')
+    riskScore += 20
+  } else if (effective_margin_percent < 20) {
+    flags.push('⚠️ Dangerously low margin (<20%) — barely any buffer')
     riskScore += 25
-  } else if (margin_percent < 30) {
-    flags.push('⚠️ Lage marge (<30%) — scope uitbreiding maakt dit snel verlieslatend')
+  } else if (effective_margin_percent < 30) {
+    flags.push('⚠️ Low margin (<30%) — any scope creep will hurt')
     riskScore += 10
+  }
+
+  if (inputs.ad_spend_through_agency && (inputs.ad_spend || 0) > inputs.monthly_retainer) {
+    flags.push(`⚠️ Ad spend (€${inputs.ad_spend}/mo) exceeds retainer — high financial exposure`)
+    riskScore += 15
   }
 
   const customCount = inputs.deliverables.custom.length
   if (customCount > 3) {
-    flags.push(`⚠️ ${customCount} custom deliverables — hoog scope creep risico`)
+    flags.push(`⚠️ ${customCount} custom deliverables — high scope creep risk`)
     riskScore += 15
   } else if (customCount > 1) {
-    flags.push(`⚠️ ${customCount} custom deliverables — zorg dat dit gedocumenteerd is`)
+    flags.push(`⚠️ ${customCount} custom deliverables — make sure these are documented`)
     riskScore += 5
   }
 
@@ -49,38 +65,39 @@ export function calculateProfitability(inputs: DealFormData): ProfitabilityResul
     inputs.deliverables.creative.length + inputs.deliverables.reporting.length +
     inputs.deliverables.strategy.length
   if (totalDeliverables > 12) {
-    flags.push(`⚠️ ${totalDeliverables} deliverables — veel voor dit team`)
+    flags.push(`⚠️ ${totalDeliverables} deliverables — a lot for this team`)
     riskScore += 10
   }
 
   if (inputs.kpi_promises.length > 0 && inputs.exclusions.length === 0) {
-    flags.push('⚠️ KPI beloften zonder uitsluitingen — risico bij niet-halen')
+    flags.push('⚠️ KPI promises without exclusions — risk if targets are missed')
     riskScore += 15
   }
   if (inputs.kpi_promises.length > 3) {
-    flags.push(`⚠️ ${inputs.kpi_promises.length} KPI beloften — overbelofte risico`)
+    flags.push(`⚠️ ${inputs.kpi_promises.length} KPI promises — overpromising risk`)
     riskScore += 10
   }
   if (inputs.verbal_promises.length > 2) {
-    flags.push(`⚠️ ${inputs.verbal_promises.length} verbale beloften — niet gedocumenteerd`)
+    flags.push(`⚠️ ${inputs.verbal_promises.length} verbal promises — not documented`)
     riskScore += 10
   }
   if (inputs.timeline_promises.length > 0) {
-    const totalHours = inputs.team_roles.reduce((sum, r) => sum + r.monthlyHours, 0)
+    const totalHours = inputs.team_roles.reduce((sum, r) => {
+      if (r.mode === 'team') return sum + (r.allocationPercent || 0)
+      return sum + r.monthlyHours
+    }, 0)
     if (totalHours < 40) {
-      flags.push('⚠️ Timeline beloften met <40u/maand team — haalbaarheid twijfelachtig')
+      flags.push('⚠️ Timeline promises with low team capacity — feasibility doubtful')
       riskScore += 10
     }
   }
 
-  // 5. Risk level
   let scope_risk_level: RiskLevel
   if (riskScore >= 40) scope_risk_level = 'HIGH'
   else if (riskScore >= 20) scope_risk_level = 'MEDIUM'
   else scope_risk_level = 'LOW'
 
-  // 6. Margin score 0-100
-  const base = Math.max(0, Math.min(100, margin_percent >= 60 ? 100 : (margin_percent / 60) * 100))
+  const base = Math.max(0, Math.min(100, effective_margin_percent >= 60 ? 100 : (effective_margin_percent / 60) * 100))
   const margin_score = Math.max(0, Math.round(base) - Math.round(riskScore / 2))
 
   return {
