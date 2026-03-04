@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai'
 import type { Deal } from '@/types/deal'
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
+const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
 export interface GeneratedDocuments {
   riskSummary: string
@@ -21,7 +21,7 @@ export async function generateDealDocuments(deal: Deal, flags: string[]): Promis
   ].join('\n')
 
   const ask = async (prompt: string) => {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt + '\n\n' + ctx,
     })
