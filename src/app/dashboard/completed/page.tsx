@@ -7,6 +7,7 @@ import { formatEuro } from '@/lib/profitability'
 import Nav from '@/components/Nav'
 import { ScoreRing, RiskBadge } from '@/components/DealBadges'
 import DealStatusButton from '@/components/DealStatusButton'
+import DeleteDealButton from '@/components/DeleteDealButton'
 
 export default async function CompletedDealsPage() {
   const agencyId = await getAgencyId()
@@ -49,8 +50,8 @@ export default async function CompletedDealsPage() {
             </div>
           ) : (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
-                {['Client', 'Retainer', 'Margin', 'Risk', '', ''].map((h, i) => (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+                {['Client', 'Retainer', 'Margin', 'Risk', '', '', ''].map((h, i) => (
                   <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                 ))}
               </div>
@@ -58,7 +59,7 @@ export default async function CompletedDealsPage() {
                 const mp = deal.margin_percent ?? 0
                 const mc = mp >= 30 ? 'var(--green)' : mp >= 20 ? 'var(--amber)' : 'var(--red)'
                 return (
-                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
+                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 100px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{deal.client_name}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{deal.industry} · {deal.contract_duration}mo</div>
@@ -70,6 +71,7 @@ export default async function CompletedDealsPage() {
                     </div>
                     <RiskBadge level={deal.scope_risk_level} />
                     <DealStatusButton dealId={deal.id} targetStatus="DRAFT" label="↩ Reopen" title="Move back to active deals" />
+                    <DeleteDealButton dealId={deal.id} clientName={deal.client_name} />
                     <Link href={`/deals/${deal.id}`} style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
                   </div>
                 )

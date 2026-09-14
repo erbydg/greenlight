@@ -132,6 +132,7 @@ export default function DealDetailPage() {
           <div style={{ display:'flex', gap:7, alignItems:'center', flexWrap:'wrap' }}>
             <span className={`gl-badge gl-badge-${risk}`}><span className="gl-badge-dot"/>{deal.scope_risk_level} RISK</span>
             <span className={`gl-status gl-status-${deal.status.toLowerCase()}`}>{deal.status}</span>
+            <Link href={`/deals/${deal.id}/edit`} className="gl-btn gl-btn-ghost">✎ Edit</Link>
             {deal.status === 'DRAFT' && (
               <>
                 <button onClick={()=>updateStatus('APPROVED')} disabled={statusLoading} className="gl-btn gl-btn-green">Approve</button>
