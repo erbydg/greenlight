@@ -39,15 +39,18 @@ export default async function DashboardPage() {
   if (!agencyId) redirect('/login')
 
   const svc = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-  const { data: agencyData } = await svc.from('agencies').select('plan').eq('id', agencyId).single()
+  const { data: agencyData } = await svc.from('agencies').select('plan, created_at').eq('id', agencyId).single()
   const plan = agencyData?.plan ?? 'trial'
-  const isTrialExpired = plan === 'trial'
+  const trialDaysElapsed = agencyData?.created_at
+    ? (Date.now() - new Date(agencyData.created_at).getTime()) / (1000 * 60 * 60 * 24)
+    : 0
+  const isTrialExpired = plan === 'trial' && trialDaysElapsed > 14
 
   let deals: Deal[] = []
   let dbError = false
   try { deals = await getAllDeals(agencyId) } catch { dbError = true }
 
-  const isLimited = isTrialExpired && deals.length >= 1
+  const isLimited = isTrialExpired
 
   const totalDeals = deals.length
   const avgMargin = totalDeals > 0 ? deals.reduce((s, d) => s + (d.margin_percent ?? 0), 0) / totalDeals : 0
@@ -71,7 +74,7 @@ export default async function DashboardPage() {
       {isLimited && (
         <div style={{background:'#fffbeb',borderBottom:'1px solid #fde68a',padding:'12px 40px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div style={{fontSize:'0.82rem',color:'#d97706'}}>
-            <strong>Your free trial has ended.</strong> You have used your 1 free deal. Upgrade to continue.
+            <strong>Your free trial has ended.</strong> Your 14-day trial is over. Upgrade to continue.
           </div>
           <a href="mailto:bas@getgreenlight.io?subject=Upgrade Greenlight" style={{display:'inline-flex',alignItems:'center',gap:6,background:'#d97706',color:'#fff',padding:'7px 16px',borderRadius:6,fontSize:'0.78rem',fontWeight:500,textDecoration:'none'}}>
             Upgrade — contact us

@@ -34,20 +34,17 @@ export async function POST(request: Request) {
     const agencyId = await getAgencyId()
     if (!agencyId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // Check trial limit
+    // Check trial period (14 days from agency creation, unlimited deals during that window)
     const { data: agency } = await getServiceClient()
       .from('agencies')
-      .select('plan')
+      .select('plan, created_at')
       .eq('id', agencyId)
       .single()
 
     if (agency?.plan === 'trial') {
-      const { count } = await getServiceClient()
-        .from('deals')
-        .select('*', { count: 'exact', head: true })
-        .eq('agency_id', agencyId)
-      if ((count ?? 0) >= 1) {
-        return NextResponse.json({ error: 'TRIAL_LIMIT', message: 'Trial limit reached' }, { status: 403 })
+      const trialDaysElapsed = (Date.now() - new Date(agency.created_at).getTime()) / (1000 * 60 * 60 * 24)
+      if (trialDaysElapsed > 14) {
+        return NextResponse.json({ error: 'TRIAL_LIMIT', message: 'Trial period has ended' }, { status: 403 })
       }
     }
     const body: DealFormData = await request.json()
