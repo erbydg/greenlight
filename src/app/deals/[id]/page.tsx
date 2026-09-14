@@ -229,6 +229,34 @@ export default function DealDetailPage() {
           </div>
         </div>
 
+        <div className="gl-card" style={{ marginBottom:16 }}>
+          <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
+            <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Deliverables & Promises</span>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:0 }}>
+            {[
+              { label:'Deliverables', items:[
+                ...deal.deliverables.paidAds, ...deal.deliverables.seo, ...deal.deliverables.creative,
+                ...deal.deliverables.reporting, ...deal.deliverables.strategy, ...deal.deliverables.custom,
+              ] },
+              { label:'KPI Promises', items:deal.kpi_promises },
+              { label:'Timeline Promises', items:deal.timeline_promises },
+              { label:'Verbal Promises', items:deal.verbal_promises },
+              { label:'Exclusions', items:deal.exclusions },
+            ].map(section => (
+              <div key={section.label} style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
+                <div style={{ fontSize:'0.65rem', fontWeight:600, color:'var(--text-light)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>{section.label}</div>
+                {section.items.length === 0
+                  ? <div style={{ fontSize:'0.8rem', color:'var(--text-light)' }}>—</div>
+                  : <ul style={{ margin:0, paddingLeft:16, fontSize:'0.82rem', lineHeight:1.6 }}>
+                      {section.items.map((item, i) => <li key={i}>{item}</li>)}
+                    </ul>
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="gl-card">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>

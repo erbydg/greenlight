@@ -11,6 +11,15 @@ export interface GeneratedDocuments {
 }
 
 export async function generateDealDocuments(deal: Deal, flags: string[]): Promise<GeneratedDocuments> {
+  const allDeliverables = [
+    ...deal.deliverables.paidAds,
+    ...deal.deliverables.seo,
+    ...deal.deliverables.creative,
+    ...deal.deliverables.reporting,
+    ...deal.deliverables.strategy,
+    ...deal.deliverables.custom,
+  ]
+
   const ctx = [
     'CLIENT: ' + deal.client_name + ' (' + deal.industry + ')',
     'CONTRACT: ' + deal.contract_duration + ' maanden @ ' + deal.monthly_retainer + '/m',
@@ -18,6 +27,13 @@ export async function generateDealDocuments(deal: Deal, flags: string[]): Promis
     'SCOPE RISICO: ' + deal.scope_risk_level,
     'MARGIN SCORE: ' + deal.margin_score + '/100',
     'FLAGS: ' + flags.join(', '),
+    'DELIVERABLES: ' + (allDeliverables.join(', ') || 'geen'),
+    'KPI BELOFTES AAN KLANT: ' + (deal.kpi_promises.join(' | ') || 'geen'),
+    'TIMELINE BELOFTES AAN KLANT: ' + (deal.timeline_promises.join(' | ') || 'geen'),
+    'MONDELINGE BELOFTES AAN KLANT: ' + (deal.verbal_promises.join(' | ') || 'geen'),
+    'EXCLUSIONS (wat NIET inbegrepen is): ' + (deal.exclusions.join(' | ') || 'geen'),
+    '',
+    'Beoordeel kritisch of de KPI/timeline/mondelinge beloftes hierboven realistisch zijn gezien de scope, marge en teamcapaciteit. Benoem expliciet elke belofte die overdreven, ongeveer onmeetbaar of onhaalbaar lijkt (bv. onrealistische ROAS, groei- of tijdsclaims).',
   ].join('\n')
 
   const ask = async (prompt: string) => {
