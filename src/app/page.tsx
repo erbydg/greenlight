@@ -8,12 +8,9 @@ import LocaleToggle from '@/components/LocaleToggle'
 export default async function LandingPage() {
   const { d } = await getServerDictionary()
   const t = d.landing
-  const avatars: [string, string][] = [['MV','#6b7280'],['LB','#16a34a'],['TK','#d97706'],['AW','#4338ca'],['JD','#dc2626']]
-  const statColors = ['#f87171', '#fbbf24', '#4ade80']
   const mockTabs = ['Risk Analysis','Scope Lock','Handover','Kickoff']
   const mockLines = ['100%','80%','100%','60%','100%','80%']
   const mockMetrics: [string, string, string][] = [['Retainer','3.500','#1c1b18'],['Margin','55.4%','#16a34a'],['Health','87/100','#1c1b18']]
-  const testimonialAvatars: [string, string][] = [['MV','#16a34a'],['LB','#d97706'],['TK','#4338ca']]
 
   return (
     <div className="lp-body">
@@ -52,9 +49,6 @@ export default async function LandingPage() {
           <Link href="/login" className="lp-btn-ghost">{t.signInArrow}</Link>
         </div>
         <div className="lp-proof">
-          <div className="lp-avatars">
-            {avatars.map(([i,c]) => <div key={i} className="lp-avatar" style={{background:c}}>{i}</div>)}
-          </div>
           <span>{t.proof}</span>
         </div>
       </section>
@@ -67,10 +61,9 @@ export default async function LandingPage() {
             <p className="lp-pain-body">{t.painBody}</p>
           </div>
           <div>
-            {t.stats.map(([n,l], i) => (
-              <div key={n} className="lp-stat">
-                <div className="lp-stat-num" style={{color:statColors[i]}}>{n}</div>
-                <div className="lp-stat-label">{l}</div>
+            {t.painPoints.map(p => (
+              <div key={p} className="lp-stat">
+                <div className="lp-stat-label" style={{color:'#e5e7eb',fontSize:'0.88rem',lineHeight:1.5}}>{p}</div>
               </div>
             ))}
           </div>
@@ -146,27 +139,6 @@ export default async function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="lp-testimonials">
-        <div className="lp-testimonials-inner">
-          <div className="lp-section-label">{t.testimonialsLabel}</div>
-          <h2 className="lp-section-title" style={{maxWidth:'100%'}}>{t.testimonialsTitle}</h2>
-          <div className="lp-tgrid">
-            {t.testimonials.map(([q,n,r], i) => (
-              <div key={n} className="lp-t">
-                <div className="lp-t-quote">{q}</div>
-                <div className="lp-t-author">
-                  <div className="lp-t-avatar" style={{background:testimonialAvatars[i][1]}}>{testimonialAvatars[i][0]}</div>
-                  <div>
-                    <div className="lp-t-name">{n}</div>
-                    <div className="lp-t-role">{r}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
