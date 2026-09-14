@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import type { Deal } from '@/types/deal'
+import type { Locale } from '@/lib/i18n/translations'
 
 const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
@@ -10,7 +11,10 @@ export interface GeneratedDocuments {
   kickoffPlan: string
 }
 
-export async function generateDealDocuments(deal: Deal, flags: string[]): Promise<GeneratedDocuments> {
+export async function generateDealDocuments(deal: Deal, flags: string[], locale: Locale = 'nl'): Promise<GeneratedDocuments> {
+  const languageInstruction = locale === 'nl'
+    ? 'Schrijf je volledige antwoord in het Nederlands.'
+    : 'Write your entire response in English.'
   const allDeliverables = [
     ...deal.deliverables.paidAds,
     ...deal.deliverables.seo,
@@ -39,7 +43,7 @@ export async function generateDealDocuments(deal: Deal, flags: string[]): Promis
   const ask = async (prompt: string) => {
     const response = await getAI().models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: prompt + '\n\n' + ctx,
+      contents: languageInstruction + ' ' + prompt + '\n\n' + ctx,
     })
     return response.text ?? ''
   }

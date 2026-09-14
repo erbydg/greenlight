@@ -2,12 +2,15 @@
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase-client'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
+import LocaleToggle from '@/components/LocaleToggle'
 
 interface Crumb { label: string; href?: string }
 
 export default function Nav({ breadcrumbs, actions }: { breadcrumbs?: Crumb[]; actions?: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { d } = useLocale()
 
   const handleLogout = async () => {
     const supabase = createSupabaseClient()
@@ -16,9 +19,9 @@ export default function Nav({ breadcrumbs, actions }: { breadcrumbs?: Crumb[]; a
   }
 
   const navLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/dashboard/completed', label: 'Completed' },
-    { href: '/settings', label: 'Settings' },
+    { href: '/dashboard', label: d.nav.dashboard },
+    { href: '/dashboard/completed', label: d.nav.completed },
+    { href: '/settings', label: d.nav.settings },
   ]
 
   return (
@@ -61,9 +64,10 @@ export default function Nav({ breadcrumbs, actions }: { breadcrumbs?: Crumb[]; a
       )}
 
       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <LocaleToggle />
         {actions}
         <button onClick={handleLogout} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.75rem', padding:'5px 12px' }}>
-          Sign out
+          {d.nav.signOut}
         </button>
       </div>
     </nav>

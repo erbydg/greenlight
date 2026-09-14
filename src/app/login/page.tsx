@@ -1,11 +1,16 @@
 'use client'
+export const runtime = 'edge'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createSupabaseClient } from '@/lib/supabase-client'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
+import LocaleToggle from '@/components/LocaleToggle'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { d } = useLocale()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +26,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:20, position:'relative' }}>
+      <div style={{ position:'absolute', top:20, right:20 }}><LocaleToggle /></div>
       <div style={{ width:'100%', maxWidth:380 }}>
         <div style={{ textAlign:'center', marginBottom:32 }}>
           <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:9, textDecoration:'none', color:'var(--text)', marginBottom:24 }}>
@@ -34,30 +40,30 @@ export default function LoginPage() {
             </div>
             <span className="font-heading" style={{ fontSize:'1.1rem', fontWeight:600 }}>Greenlight</span>
           </Link>
-          <h1 className="font-heading" style={{ fontSize:'1.5rem', fontWeight:600, letterSpacing:'-0.02em', marginBottom:6 }}>Welcome back</h1>
-          <p style={{ fontSize:'0.82rem', color:'var(--text-muted)' }}>Sign in to your agency account</p>
+          <h1 className="font-heading" style={{ fontSize:'1.5rem', fontWeight:600, letterSpacing:'-0.02em', marginBottom:6 }}>{d.auth.login.title}</h1>
+          <p style={{ fontSize:'0.82rem', color:'var(--text-muted)' }}>{d.auth.login.sub}</p>
         </div>
         <div className="gl-card" style={{ padding:28 }}>
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom:14 }}>
-              <div style={{ fontSize:'0.72rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:5 }}>Email</div>
+              <div style={{ fontSize:'0.72rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:5 }}>{d.auth.login.email}</div>
               <input required type="email" className="gl-input" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@agency.com"/>
             </div>
             <div style={{ marginBottom:20 }}>
-              <div style={{ fontSize:'0.72rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:5 }}>Password</div>
+              <div style={{ fontSize:'0.72rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:5 }}>{d.auth.login.password}</div>
               <input required type="password" className="gl-input" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••"/>
             </div>
             {error && (
               <div style={{ background:'var(--red-bg)', border:'1px solid var(--red-border)', borderRadius:6, padding:'10px 12px', fontSize:'0.8rem', color:'var(--red)', marginBottom:14 }}>{error}</div>
             )}
             <button type="submit" disabled={loading} className="gl-btn gl-btn-primary" style={{ width:'100%', justifyContent:'center', padding:12, fontSize:'0.88rem', opacity:loading?0.7:1 }}>
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? d.auth.login.signingIn : d.auth.login.signIn}
             </button>
           </form>
         </div>
         <div style={{ textAlign:'center', marginTop:16, fontSize:'0.8rem', color:'var(--text-muted)' }}>
-          No account yet?{' '}
-          <Link href="/signup" style={{ color:'var(--green)', fontWeight:500, textDecoration:'none' }}>Create one →</Link>
+          {d.auth.login.noAccount}{' '}
+          <Link href="/signup" style={{ color:'var(--green)', fontWeight:500, textDecoration:'none' }}>{d.auth.login.createOne}</Link>
         </div>
       </div>
     </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { getLocale } from '@/lib/i18n/server'
+import { LocaleProvider } from '@/lib/i18n/LocaleProvider'
 
 export const metadata: Metadata = {
   title: 'Greenlight — Agency Deal Profitability',
@@ -9,10 +11,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang={locale}>
+      <body>
+        <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   )
 }

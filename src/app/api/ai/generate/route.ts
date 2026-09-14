@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateDealDocuments } from '@/lib/gemini'
 import { calculateProfitability } from '@/lib/profitability'
+import { parseLocale } from '@/lib/i18n/translations'
 import type { DealFormData } from '@/types/deal'
 
 function getServiceClient() {
@@ -14,8 +15,9 @@ function getServiceClient() {
 
 export async function POST(request: Request) {
   try {
-    const { dealId } = await request.json()
+    const { dealId, locale: rawLocale } = await request.json()
     if (!dealId) return NextResponse.json({ error: 'dealId is verplicht' }, { status: 400 })
+    const locale = parseLocale(rawLocale)
 
     const { data: deal, error } = await getServiceClient()
       .from('deals')
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     const { flags } = calculateProfitability(formData)
-    const documents = await generateDealDocuments(deal, flags)
+    const documents = await generateDealDocuments(deal, flags, locale)
 
     const { data: updatedDeal, error: updateError } = await getServiceClient()
       .from('deals')

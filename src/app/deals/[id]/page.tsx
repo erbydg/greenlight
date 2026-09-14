@@ -6,7 +6,8 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import { formatEuro } from '@/lib/profitability'
-import type { Deal, RiskLevel } from '@/types/deal'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
+import type { Deal } from '@/types/deal'
 
 function ScoreRing({ score }: { score: number | null }) {
   const s = score ?? 0
@@ -53,15 +54,11 @@ async function downloadPDF(title: string, content: string, filename: string) {
   doc.save(filename)
 }
 
-const TABS = [
-  { key:'risk',     label:'Risk Analysis',  num:1, field:'ai_risk_summary'   as const, note:'Internal use only · Do not share with client' },
-  { key:'scope',    label:'Scope Lock',     num:2, field:'ai_scope_lock_doc' as const, note:'Client-facing · Send before kickoff · Get written acknowledgement' },
-  { key:'handover', label:'Handover Brief', num:3, field:'ai_handover_brief' as const, note:'Internal · Share with Project Manager and delivery lead' },
-  { key:'kickoff',  label:'30-Day Kickoff', num:4, field:'ai_kickoff_plan'   as const, note:'Internal + shareable with client after kickoff call' },
-]
+const DOC_FIELDS = ['ai_risk_summary', 'ai_scope_lock_doc', 'ai_handover_brief', 'ai_kickoff_plan'] as const
 
 export default function DealDetailPage() {
   const params = useParams()
+  const { locale, d } = useLocale()
   const [deal, setDeal] = useState<Deal | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -69,12 +66,14 @@ export default function DealDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [statusLoading, setStatusLoading] = useState(false)
 
+  const TABS = d.dealDetail.tabs.map((t, i) => ({ ...t, num: i + 1, field: DOC_FIELDS[i] }))
+
   useEffect(() => {
     fetch(`/api/deals/${params.id}`)
       .then(r => r.json())
-      .then(d => { setDeal(d); setLoading(false) })
-      .catch(() => { setError('Deal not found'); setLoading(false) })
-  }, [params.id])
+      .then(dl => { setDeal(dl); setLoading(false) })
+      .catch(() => { setError(d.dealDetail.notFound); setLoading(false) })
+  }, [params.id, d.dealDetail.notFound])
 
   const updateStatus = async (status: string) => {
     setStatusLoading(true)
@@ -89,14 +88,14 @@ export default function DealDetailPage() {
     setGenerating(true); setError(null)
     try {
       const res = await fetch('/api/ai/generate', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ dealId: params.id })
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ dealId: params.id, locale })
       })
       if (!res.ok) throw new Error()
       const { deal: updated } = await res.json()
       setDeal(updated)
       setActiveTab('risk')
     } catch {
-      setError('AI generation failed. Check your Gemini API key.')
+      setError(d.dealDetail.generateFailed)
     } finally {
       setGenerating(false)
     }
@@ -104,15 +103,15 @@ export default function DealDetailPage() {
 
   if (loading) return (
     <>
-      <Nav breadcrumbs={[{label:'Dashboard',href:'/'},{label:'Loading…'}]}/>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--text-muted)', fontSize:'0.85rem' }}>Loading deal…</div>
+      <Nav breadcrumbs={[{label:d.dealForm.breadcrumbDashboard,href:'/'},{label:d.dealForm.editLoadingCrumb}]}/>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--text-muted)', fontSize:'0.85rem' }}>{d.dealDetail.loading}</div>
     </>
   )
 
   if (!deal) return (
     <>
-      <Nav breadcrumbs={[{label:'Dashboard',href:'/'},{label:'Not found'}]}/>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--red)', fontSize:'0.85rem' }}>{error || 'Deal not found'}</div>
+      <Nav breadcrumbs={[{label:d.dealForm.breadcrumbDashboard,href:'/'},{label:d.dealForm.editNotFoundCrumb}]}/>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--red)', fontSize:'0.85rem' }}>{error || d.dealDetail.notFound}</div>
     </>
   )
 
@@ -127,16 +126,16 @@ export default function DealDetailPage() {
   return (
     <>
       <Nav
-        breadcrumbs={[{ label:'Dashboard', href:'/' }, { label: deal.client_name }]}
+        breadcrumbs={[{ label:d.dealForm.breadcrumbDashboard, href:'/' }, { label: deal.client_name }]}
         actions={
           <div style={{ display:'flex', gap:7, alignItems:'center', flexWrap:'wrap' }}>
-            <span className={`gl-badge gl-badge-${risk}`}><span className="gl-badge-dot"/>{deal.scope_risk_level} RISK</span>
-            <span className={`gl-status gl-status-${deal.status.toLowerCase()}`}>{deal.status}</span>
-            <Link href={`/deals/${deal.id}/edit`} className="gl-btn gl-btn-ghost">✎ Edit</Link>
+            <span className={`gl-badge gl-badge-${risk}`}><span className="gl-badge-dot"/>{d.risk[deal.scope_risk_level ?? 'LOW']} {d.dealDetail.riskSuffix}</span>
+            <span className={`gl-status gl-status-${deal.status.toLowerCase()}`}>{d.status[deal.status]}</span>
+            <Link href={`/deals/${deal.id}/edit`} className="gl-btn gl-btn-ghost">{d.dealDetail.edit}</Link>
             {deal.status === 'DRAFT' && (
               <>
-                <button onClick={()=>updateStatus('APPROVED')} disabled={statusLoading} className="gl-btn gl-btn-green">Approve</button>
-                <button onClick={()=>updateStatus('REJECTED')} disabled={statusLoading} className="gl-btn gl-btn-danger">Reject</button>
+                <button onClick={()=>updateStatus('APPROVED')} disabled={statusLoading} className="gl-btn gl-btn-green">{d.dealDetail.approve}</button>
+                <button onClick={()=>updateStatus('REJECTED')} disabled={statusLoading} className="gl-btn gl-btn-danger">{d.dealDetail.reject}</button>
               </>
             )}
           </div>
@@ -148,9 +147,9 @@ export default function DealDetailPage() {
           <h1 className="font-heading" style={{ fontSize:'1.6rem', fontWeight:600, letterSpacing:'-0.02em', lineHeight:1 }}>{deal.client_name}</h1>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:6, fontSize:'0.78rem', color:'var(--text-muted)', flexWrap:'wrap' }}>
             <span>{deal.industry}</span><span style={{ color:'var(--text-light)' }}>·</span>
-            <span>{deal.contract_duration}-month contract</span><span style={{ color:'var(--text-light)' }}>·</span>
+            <span>{d.dealDetail.durationUnit(deal.contract_duration)}</span><span style={{ color:'var(--text-light)' }}>·</span>
             <span>{formatEuro(deal.monthly_retainer)}/mo</span>
-            {(deal.setup_fee ?? 0) > 0 && <><span style={{ color:'var(--text-light)' }}>·</span><span>+{formatEuro(deal.setup_fee)} setup</span></>}
+            {(deal.setup_fee ?? 0) > 0 && <><span style={{ color:'var(--text-light)' }}>·</span><span>+{formatEuro(deal.setup_fee)}</span></>}
           </div>
         </div>
 
@@ -161,10 +160,10 @@ export default function DealDetailPage() {
                 <ScoreRing score={deal.margin_score}/>
                 <div>
                   {[
-                    ['Margin', `${marginPct.toFixed(1)}%`, marginColor],
-                    ['Scope Risk', deal.scope_risk_level ?? '—', risk==='high'?'var(--red)':risk==='medium'?'var(--amber)':'var(--green)'],
-                    ['Retainer', `${formatEuro(deal.monthly_retainer)}/mo`, ''],
-                    ['Duration', `${deal.contract_duration} months`, ''],
+                    [d.dealDetail.margin, `${marginPct.toFixed(1)}%`, marginColor],
+                    [d.dealDetail.scopeRisk, deal.scope_risk_level ? d.risk[deal.scope_risk_level] : d.common.dash, risk==='high'?'var(--red)':risk==='medium'?'var(--amber)':'var(--green)'],
+                    [d.dealDetail.retainer, `${formatEuro(deal.monthly_retainer)}/mo`, ''],
+                    [d.dealDetail.duration, d.dealDetail.durationUnit(deal.contract_duration), ''],
                   ].map(([k,v,c]) => (
                     <div key={String(k)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid var(--border)', fontSize:'0.8rem' }}>
                       <span style={{ color:'var(--text-muted)', fontSize:'0.75rem' }}>{String(k)}</span>
@@ -177,9 +176,9 @@ export default function DealDetailPage() {
 
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:1, background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
               {[
-                { label:'Internal Cost', value:formatEuro(deal.total_monthly_cost??0), sub:'per month', green:false },
-                { label:'Gross Margin',  value:formatEuro(deal.gross_margin??0),       sub:'per month', green:true  },
-                { label:'Total Profit',  value:formatEuro(totalProfit),                sub:`${deal.contract_duration}m + setup fee`, green:false },
+                { label:d.dealDetail.internalCost, value:formatEuro(deal.total_monthly_cost??0), sub:d.dealDetail.perMonth, green:false },
+                { label:d.dealDetail.grossMargin,  value:formatEuro(deal.gross_margin??0),       sub:d.dealDetail.perMonth, green:true  },
+                { label:d.dealDetail.totalProfit,  value:formatEuro(totalProfit),                sub:d.dealDetail.contractSub(deal.contract_duration), green:false },
               ].map(f => (
                 <div key={f.label} style={{ background:'var(--surface)', padding:'16px 18px' }}>
                   <div style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6 }}>{f.label}</div>
@@ -193,24 +192,24 @@ export default function DealDetailPage() {
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             <div className="gl-card">
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', background:'var(--bg)', borderBottom:'1px solid var(--border)' }}>
-                <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Risk Flags</span>
-                <span className={`gl-badge gl-badge-${risk}`}><span className="gl-badge-dot"/>{deal.scope_risk_level}</span>
+                <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{d.dealDetail.riskFlags}</span>
+                <span className={`gl-badge gl-badge-${risk}`}><span className="gl-badge-dot"/>{d.risk[deal.scope_risk_level ?? 'LOW']}</span>
               </div>
               {marginPct < 30
                 ? <div style={{ display:'flex', gap:12, padding:'12px 16px' }}>
                     <div style={{ width:20, height:20, borderRadius:4, background:'var(--amber-bg)', color:'var(--amber)', border:'1px solid var(--amber-border)', display:'grid', placeItems:'center', fontSize:'0.65rem', fontWeight:700, flexShrink:0, marginTop:1 }}>!</div>
                     <div>
-                      <div style={{ fontSize:'0.65rem', color:'var(--text-light)', fontWeight:500, marginBottom:2, textTransform:'uppercase', letterSpacing:'0.03em' }}>MARGIN-001</div>
-                      <div style={{ fontSize:'0.8rem', lineHeight:1.45 }}>Margin {marginPct.toFixed(1)}% — below 30%. Any scope creep will hurt.</div>
+                      <div style={{ fontSize:'0.65rem', color:'var(--text-light)', fontWeight:500, marginBottom:2, textTransform:'uppercase', letterSpacing:'0.03em' }}>{d.dealDetail.marginFlagCode}</div>
+                      <div style={{ fontSize:'0.8rem', lineHeight:1.45 }}>{d.dealDetail.marginFlagBody(marginPct.toFixed(1))}</div>
                     </div>
                   </div>
-                : <div style={{ padding:'20px 16px', textAlign:'center', fontSize:'0.8rem', color:'var(--green)' }}>✓ No critical margin flags</div>
+                : <div style={{ padding:'20px 16px', textAlign:'center', fontSize:'0.8rem', color:'var(--green)' }}>{d.dealDetail.noMarginFlags}</div>
               }
               {(deal.kpi_promises.length > 0 || deal.timeline_promises.length > 0 || deal.verbal_promises.length > 0) && (
                 <div style={{ display:'flex', gap:12, padding:'12px 16px', borderTop:'1px solid var(--border)', background:'var(--amber-bg)' }}>
                   <div style={{ width:20, height:20, borderRadius:4, background:'var(--amber-bg)', color:'var(--amber)', border:'1px solid var(--amber-border)', display:'grid', placeItems:'center', fontSize:'0.65rem', fontWeight:700, flexShrink:0, marginTop:1 }}>i</div>
                   <div style={{ fontSize:'0.78rem', lineHeight:1.45, color:'var(--amber)' }}>
-                    Dit cijfer beoordeelt marge en aantallen, niet of je beloftes realistisch zijn. Bekijk altijd de <strong>AI Risk Analysis</strong> hieronder voor een inhoudelijke check.
+                    {d.dealDetail.promiseWarning}
                   </div>
                 </div>
               )}
@@ -218,20 +217,20 @@ export default function DealDetailPage() {
 
             <div className="gl-card">
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', background:'var(--bg)', borderBottom:'1px solid var(--border)' }}>
-                <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Team Allocation</span>
+                <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{d.dealDetail.teamAllocation}</span>
               </div>
               <div style={{ padding:16 }}>
                 {deal.team_roles.map((r, i) => (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:'1px solid var(--border)', fontSize:'0.82rem' }}>
                     <div>
                       <div style={{ fontWeight:500 }}>{r.role}</div>
-                      <div style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:1 }}>{r.monthlyHours}h/mo @ €{r.hourlyCost}/h</div>
+                      <div style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:1 }}>{d.dealDetail.hoursAtRate(r.monthlyHours, r.hourlyCost)}</div>
                     </div>
                     <div className="font-heading" style={{ fontSize:'0.95rem', fontWeight:600 }}>{formatEuro(r.hourlyCost*r.monthlyHours)}</div>
                   </div>
                 ))}
                 <div style={{ display:'flex', justifyContent:'space-between', paddingTop:12, marginTop:4, borderTop:'1px solid var(--border)', fontSize:'0.82rem', fontWeight:600 }}>
-                  <span>Total / month</span><span>{formatEuro(deal.total_monthly_cost??0)}</span>
+                  <span>{d.dealDetail.totalPerMonth}</span><span>{formatEuro(deal.total_monthly_cost??0)}</span>
                 </div>
               </div>
             </div>
@@ -240,23 +239,23 @@ export default function DealDetailPage() {
 
         <div className="gl-card" style={{ marginBottom:16 }}>
           <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
-            <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Deliverables & Promises</span>
+            <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{d.dealDetail.deliverablesPromises}</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:0 }}>
             {[
-              { label:'Deliverables', items:[
+              { label:d.dealDetail.secDeliverables, items:[
                 ...deal.deliverables.paidAds, ...deal.deliverables.seo, ...deal.deliverables.creative,
                 ...deal.deliverables.reporting, ...deal.deliverables.strategy, ...deal.deliverables.custom,
               ] },
-              { label:'KPI Promises', items:deal.kpi_promises },
-              { label:'Timeline Promises', items:deal.timeline_promises },
-              { label:'Verbal Promises', items:deal.verbal_promises },
-              { label:'Exclusions', items:deal.exclusions },
+              { label:d.dealDetail.secKpi, items:deal.kpi_promises },
+              { label:d.dealDetail.secTimeline, items:deal.timeline_promises },
+              { label:d.dealDetail.secVerbal, items:deal.verbal_promises },
+              { label:d.dealDetail.secExclusions, items:deal.exclusions },
             ].map(section => (
               <div key={section.label} style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
                 <div style={{ fontSize:'0.65rem', fontWeight:600, color:'var(--text-light)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>{section.label}</div>
                 {section.items.length === 0
-                  ? <div style={{ fontSize:'0.8rem', color:'var(--text-light)' }}>—</div>
+                  ? <div style={{ fontSize:'0.8rem', color:'var(--text-light)' }}>{d.common.dash}</div>
                   : <ul style={{ margin:0, paddingLeft:16, fontSize:'0.82rem', lineHeight:1.6 }}>
                       {section.items.map((item, i) => <li key={i}>{item}</li>)}
                     </ul>
@@ -269,34 +268,34 @@ export default function DealDetailPage() {
         <div className="gl-card">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>AI Documents</span>
+              <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{d.dealDetail.aiDocuments}</span>
               {hasDocuments && !generating && (
                 <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:'0.72rem', color:'var(--green)', fontWeight:500 }}>
                   <span className="logo-blink" style={{ width:6, height:6, background:'var(--green)', borderRadius:'50%', display:'inline-block', boxShadow:'0 0 5px var(--green)' }}/>
-                  4 documents ready
+                  {d.dealDetail.docsReady}
                 </div>
               )}
             </div>
             {hasDocuments && !generating
-              ? <button onClick={generate} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.72rem', padding:'5px 12px' }}>↺ Regenerate</button>
-              : !generating && <button onClick={generate} className="gl-btn gl-btn-primary">✦ Generate documents</button>
+              ? <button onClick={generate} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.72rem', padding:'5px 12px' }}>{d.dealDetail.regenerate}</button>
+              : !generating && <button onClick={generate} className="gl-btn gl-btn-primary">{d.dealDetail.generate}</button>
             }
           </div>
 
           {generating && (
             <div style={{ padding:'56px 28px', display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
               <div className="gl-loader">{[0,1,2,3,4].map(i=><div key={i} className="gl-lb" style={{ animationDelay:`${i*0.1}s`, background:'var(--green)' }}/>)}</div>
-              <div style={{ fontWeight:500, fontSize:'0.88rem' }}>Generating documents…</div>
-              <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>AI is analysing your deal and writing 4 documents</div>
+              <div style={{ fontWeight:500, fontSize:'0.88rem' }}>{d.dealDetail.generating}</div>
+              <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{d.dealDetail.generatingSub}</div>
             </div>
           )}
 
           {!hasDocuments && !generating && (
             <div style={{ padding:'56px 28px', textAlign:'center' }}>
               <div style={{ width:44, height:44, background:'var(--bg)', border:'1px solid var(--border)', borderRadius:10, display:'grid', placeItems:'center', margin:'0 auto 16px', color:'var(--text-light)', fontSize:'1.3rem' }}>✦</div>
-              <div className="font-heading" style={{ fontSize:'1rem', fontWeight:600, marginBottom:8 }}>Documents not yet generated</div>
+              <div className="font-heading" style={{ fontSize:'1rem', fontWeight:600, marginBottom:8 }}>{d.dealDetail.notGeneratedTitle}</div>
               <div style={{ fontSize:'0.82rem', color:'var(--text-muted)', maxWidth:340, margin:'0 auto 20px' }}>
-                Click "Generate documents" to create your Risk Analysis, Scope Lock, Handover Brief and 30-Day Kickoff Plan.
+                {d.dealDetail.notGeneratedBody}
               </div>
             </div>
           )}
@@ -313,7 +312,7 @@ export default function DealDetailPage() {
               <div key={activeTab} className="animate-fade-up" style={{ padding:'28px 28px 12px' }}>
                 {activeContent
                   ? <DocContent content={activeContent}/>
-                  : <div style={{ textAlign:'center', padding:'32px 0', color:'var(--text-muted)', fontSize:'0.82rem' }}>This document was not generated. Try regenerating.</div>
+                  : <div style={{ textAlign:'center', padding:'32px 0', color:'var(--text-muted)', fontSize:'0.82rem' }}>{d.dealDetail.docMissing}</div>
                 }
               </div>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 28px', borderTop:'1px solid var(--border)', background:'var(--bg)' }}>
@@ -321,7 +320,7 @@ export default function DealDetailPage() {
                 {activeContent && (
                   <button onClick={()=>downloadPDF(activeTabDef.label, activeContent, `${deal.client_name}-${activeTab}.pdf`)} className="gl-btn gl-btn-primary" style={{ fontSize:'0.78rem', padding:'8px 18px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download PDF
+                    {d.dealDetail.downloadPdf}
                   </button>
                 )}
               </div>

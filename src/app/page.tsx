@@ -1,32 +1,19 @@
+export const runtime = 'edge'
+
 import Link from 'next/link'
 import './landing.css'
+import { getServerDictionary } from '@/lib/i18n/server'
+import LocaleToggle from '@/components/LocaleToggle'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { d } = await getServerDictionary()
+  const t = d.landing
   const avatars: [string, string][] = [['MV','#6b7280'],['LB','#16a34a'],['TK','#d97706'],['AW','#4338ca'],['JD','#dc2626']]
-  const stats: [string, string, string][] = [
-    ['€47.200','#f87171','Gemiddeld jaarlijks verlies aan onrendabele deals voor een bureau van 5 personen'],
-    ['68%','#fbbf24','Van bureau-eigenaars zegt spijt te hebben van een deal nadat de delivery gestart was'],
-    ['< 5 min','#4ade80','Tijd tot een volledig winstgevendheidsoordeel met Greenlight'],
-  ]
-  const steps: [string, string, string][] = [
-    ['01','Vul je deal in','Klantinfo, retainer, teamverdeling, deliverables en gemaakte beloftes. Gestructureerde velden — geen chaotische vrije tekst.'],
-    ['02','Krijg je oordeel','Greenlight berekent de echte marge, signaleert scope-risico en geeft een Deal Health Score — deterministische logica, geen AI-hallucinaties.'],
-    ['03','Genereer je documenten','AI schrijft je Risk Analysis, Scope Lock, Handover Brief en 30-Day Kickoff Plan. Klaar.'],
-  ]
-  const features: [string, string][] = [
-    ['Risk Analysis','intern document dat aangeeft wat delivery vanaf dag 1 moet weten'],
-    ['Scope Lock','klantgericht document dat vastlegt wat wel en niet inbegrepen is'],
-    ['Handover Brief','gestructureerde brief voor je projectmanager of delivery lead'],
-    ['30-Day Kickoff Plan','week-per-week acties met eigenaars, klaar om te delen'],
-  ]
-  const testimonials: [string, string, string, string, string][] = [
-    ['We zeiden nee tegen een klant van 3k/maand nadat Greenlight ons toonde dat we eigenlijk verlies zouden maken aan onze echte uurtarieven. Dat was ongemakkelijk — en precies wat we nodig hadden.','Michael V.','Oprichter, performance marketing bureau · Gent','#16a34a','MV'],
-    ['Het Scope Lock-document alleen al bespaarde ons een nachtmerrie van een klantgesprek. We stuurden het voor de kickoff en ze tekenden af op wat uitgesloten was. Geen "maar ik dacht dat dit inbegrepen was" meer.','Laura B.','Mede-oprichter, social media bureau · Amsterdam','#d97706','LB'],
-    ['Ik deed dit vroeger in een spreadsheet en dat kostte een uur. Greenlight doet het in 4 minuten en genereert automatisch het overdrachtsdocument. Nu een vast onderdeel van elke deal die we sluiten.','Thomas K.','Eigenaar, SEO & content bureau · Antwerpen','#4338ca','TK'],
-  ]
+  const statColors = ['#f87171', '#fbbf24', '#4ade80']
   const mockTabs = ['Risk Analysis','Scope Lock','Handover','Kickoff']
   const mockLines = ['100%','80%','100%','60%','100%','80%']
   const mockMetrics: [string, string, string][] = [['Retainer','3.500','#1c1b18'],['Margin','55.4%','#16a34a'],['Health','87/100','#1c1b18']]
+  const testimonialAvatars: [string, string][] = [['MV','#16a34a'],['LB','#d97706'],['TK','#4338ca']]
 
   return (
     <div className="lp-body">
@@ -41,45 +28,48 @@ export default function LandingPage() {
           <span className="lp-logo-name">Greenlight</span>
         </a>
         <div className="lp-nav-links">
-          <a href="#how" className="lp-nav-link">Hoe het werkt</a>
-          <Link href="/login" className="lp-nav-link">Inloggen</Link>
+          <a href="#how" className="lp-nav-link">{t.navHow}</a>
+          <Link href="/login" className="lp-nav-link">{t.navSignIn}</Link>
         </div>
-        <Link href="/signup" className="lp-nav-cta">
-          Probeer gratis
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </Link>
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <LocaleToggle />
+          <Link href="/signup" className="lp-nav-cta">
+            {t.navCta}
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+        </div>
       </nav>
 
       <section className="lp-hero">
-        <div className="lp-eyebrow"><span className="lp-eyebrow-dot"/>Gemaakt voor marketingbureaus</div>
-        <h1 className="lp-h1 lp-fade">Weet of een deal <em>écht winstgevend</em> is<br/>vóór je ja zegt.</h1>
-        <p className="lp-sub lp-fade">Greenlight berekent je echte interne kostprijs, signaleert scope-risico en genereert de documenten die je deliveryteam nodig heeft — in minder dan 5 minuten.</p>
+        <div className="lp-eyebrow"><span className="lp-eyebrow-dot"/>{t.eyebrow}</div>
+        <h1 className="lp-h1 lp-fade">{t.h1a}<em>{t.h1em}</em>{t.h1b}</h1>
+        <p className="lp-sub lp-fade">{t.sub}</p>
         <div className="lp-actions lp-fade">
           <Link href="/signup" className="lp-btn">
-            Probeer gratis
+            {t.ctaPrimary}
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7.5 3.5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </Link>
-          <Link href="/login" className="lp-btn-ghost">Inloggen →</Link>
+          <Link href="/login" className="lp-btn-ghost">{t.signInArrow}</Link>
         </div>
         <div className="lp-proof">
           <div className="lp-avatars">
             {avatars.map(([i,c]) => <div key={i} className="lp-avatar" style={{background:c}}>{i}</div>)}
           </div>
-          <span>12 bureaus in bèta · Geen kredietkaart nodig</span>
+          <span>{t.proof}</span>
         </div>
       </section>
 
       <section className="lp-pain">
         <div className="lp-pain-inner">
           <div>
-            <div className="lp-pain-label">De echte kost van slechte deals</div>
-            <h2 className="lp-pain-title">De meeste bureau-eigenaars aanvaarden deals zonder ooit de <em>echte kostprijs</em> te berekenen.</h2>
-            <p className="lp-pain-body">Je offreert op buikgevoel. Je belooft deliverables om de deal binnen te halen. Zes weken later is je team opgebrand, is de marge verdwenen, en wil de klant nog meer. Greenlight stopt dit voor het begint.</p>
+            <div className="lp-pain-label">{t.painLabel}</div>
+            <h2 className="lp-pain-title">{t.painTitleA}<em>{t.painTitleEm}</em>{t.painTitleB}</h2>
+            <p className="lp-pain-body">{t.painBody}</p>
           </div>
           <div>
-            {stats.map(([n,c,l]) => (
+            {t.stats.map(([n,l], i) => (
               <div key={n} className="lp-stat">
-                <div className="lp-stat-num" style={{color:c}}>{n}</div>
+                <div className="lp-stat-num" style={{color:statColors[i]}}>{n}</div>
                 <div className="lp-stat-label">{l}</div>
               </div>
             ))}
@@ -88,13 +78,13 @@ export default function LandingPage() {
       </section>
 
       <section className="lp-hiw" id="how">
-        <div className="lp-section-label">Hoe het werkt</div>
-        <h2 className="lp-section-title">Van deal naar beslissing in drie stappen.</h2>
+        <div className="lp-section-label">{t.howLabel}</div>
+        <h2 className="lp-section-title">{t.howTitle}</h2>
         <div className="lp-steps">
-          {steps.map(([n,t,b]) => (
+          {t.steps.map(([n,ti,b]) => (
             <div key={n} className="lp-step">
               <div className="lp-step-num">{n}</div>
-              <div className="lp-step-title">{t}</div>
+              <div className="lp-step-title">{ti}</div>
               <div className="lp-step-body">{b}</div>
             </div>
           ))}
@@ -104,14 +94,14 @@ export default function LandingPage() {
       <section className="lp-demo-wrap">
         <div className="lp-demo-inner">
           <div>
-            <div className="lp-section-label">Wat je krijgt</div>
-            <h2 className="lp-demo-title">Alles wat je deal nodig heeft om van sales naar delivery te gaan.</h2>
-            <p className="lp-demo-sub">Greenlight genereert vier professionele documenten voor elke deal — zodat er niets verloren gaat bij de overdracht.</p>
+            <div className="lp-section-label">{t.getLabel}</div>
+            <h2 className="lp-demo-title">{t.getTitle}</h2>
+            <p className="lp-demo-sub">{t.getSub}</p>
             <ul className="lp-feature-list">
-              {features.map(([t,d]) => (
-                <li key={t} className="lp-feature-item">
+              {t.features.map(([ti,de]) => (
+                <li key={ti} className="lp-feature-item">
                   <span className="lp-feature-check">&#10003;</span>
-                  <span><strong style={{color:'#fff'}}>{t}</strong> — {d}</span>
+                  <span><strong style={{color:'#fff'}}>{ti}</strong> — {de}</span>
                 </li>
               ))}
             </ul>
@@ -123,16 +113,16 @@ export default function LandingPage() {
                 <div className="lp-mock-dot" style={{background:'#febc2e'}}/>
                 <div className="lp-mock-dot" style={{background:'#28c840'}}/>
               </div>
-              <span style={{fontSize:'0.72rem',color:'#8a8780',fontWeight:500,marginLeft:4}}>Greenlight — Vastgoed BV</span>
+              <span style={{fontSize:'0.72rem',color:'#8a8780',fontWeight:500,marginLeft:4}}>Greenlight — {t.mockCompany}</span>
             </div>
             <div className="lp-mock-body">
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
                 <div>
-                  <div style={{fontFamily:'Fraunces,Georgia,serif',fontSize:'1rem',fontWeight:600,marginBottom:4}}>Vastgoed BV</div>
-                  <div style={{fontSize:'0.72rem',color:'#8a8780'}}>Vastgoed · 3 maanden · Vandaag aangemaakt</div>
+                  <div style={{fontFamily:'Fraunces,Georgia,serif',fontSize:'1rem',fontWeight:600,marginBottom:4}}>{t.mockCompany}</div>
+                  <div style={{fontSize:'0.72rem',color:'#8a8780'}}>{t.mockIndustryLine}</div>
                 </div>
                 <span style={{display:'inline-flex',alignItems:'center',gap:4,background:'#f0fdf4',border:'1px solid #bbf7d0',color:'#16a34a',fontSize:'0.62rem',fontWeight:600,padding:'2px 7px',borderRadius:10}}>
-                  <span style={{width:4,height:4,background:'#16a34a',borderRadius:'50%',display:'inline-block'}}/>LOW RISK
+                  <span style={{width:4,height:4,background:'#16a34a',borderRadius:'50%',display:'inline-block'}}/>{t.mockRisk}
                 </span>
               </div>
               <div className="lp-mock-metrics">
@@ -148,7 +138,7 @@ export default function LandingPage() {
               </div>
               <div style={{border:'1px solid #e4e1db',borderRadius:8,overflow:'hidden'}}>
                 <div className="lp-mock-tabs">
-                  {mockTabs.map((t,i) => <div key={t} className={"lp-mock-tab"+(i===0?" active":"")}>{t}</div>)}
+                  {mockTabs.map((t2,i) => <div key={t2} className={"lp-mock-tab"+(i===0?" active":"")}>{t2}</div>)}
                 </div>
                 <div className="lp-mock-doc">
                   <div className="lp-mock-line" style={{background:'#bbf7d0',width:'40%',marginBottom:10}}/>
@@ -162,14 +152,14 @@ export default function LandingPage() {
 
       <section className="lp-testimonials">
         <div className="lp-testimonials-inner">
-          <div className="lp-section-label">Van bèta-gebruikers</div>
-          <h2 className="lp-section-title" style={{maxWidth:'100%'}}>Bureaus die nu al hun marges beschermen.</h2>
+          <div className="lp-section-label">{t.testimonialsLabel}</div>
+          <h2 className="lp-section-title" style={{maxWidth:'100%'}}>{t.testimonialsTitle}</h2>
           <div className="lp-tgrid">
-            {testimonials.map(([q,n,r,c,i]) => (
+            {t.testimonials.map(([q,n,r], i) => (
               <div key={n} className="lp-t">
                 <div className="lp-t-quote">{q}</div>
                 <div className="lp-t-author">
-                  <div className="lp-t-avatar" style={{background:c}}>{i}</div>
+                  <div className="lp-t-avatar" style={{background:testimonialAvatars[i][1]}}>{testimonialAvatars[i][0]}</div>
                   <div>
                     <div className="lp-t-name">{n}</div>
                     <div className="lp-t-role">{r}</div>
@@ -182,20 +172,20 @@ export default function LandingPage() {
       </section>
 
       <section className="lp-cta">
-        <h2 className="lp-cta-title">Stop met gokken.<br/>Begin met <em>greenlighten</em>.</h2>
-        <p className="lp-cta-sub">Je volgende deal levert je geld op, of kost je geld. Weet welke van de twee, voordat je ja zegt.</p>
+        <h2 className="lp-cta-title">{t.ctaTitleA}<br/>{t.ctaTitlePre}<em>{t.ctaTitleEm}</em>{t.ctaTitlePost}</h2>
+        <p className="lp-cta-sub">{t.ctaSub}</p>
         <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
           <Link href="/signup" className="lp-btn">
-            Probeer gratis
+            {t.ctaPrimary}
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7.5 3.5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </Link>
-          <p style={{fontSize:'0.76rem',color:'#b8b4ab'}}>14 dagen gratis proberen · Geen kredietkaart nodig · Op elk moment opzegbaar</p>
+          <p style={{fontSize:'0.76rem',color:'#b8b4ab'}}>{t.trialLine}</p>
         </div>
       </section>
 
       <footer className="lp-footer">
         <span className="lp-footer-logo">Greenlight</span>
-        <span className="lp-footer-note">2026 Greenlight · Gemaakt in België</span>
+        <span className="lp-footer-note">{t.footerNote}</span>
       </footer>
     </div>
   )

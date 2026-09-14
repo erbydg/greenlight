@@ -1,4 +1,7 @@
 import type { RiskLevel } from '@/types/deal'
+import type { getDictionary } from '@/lib/i18n/translations'
+
+type Dict = ReturnType<typeof getDictionary>
 
 export function ScoreRing({ score, size = 28 }: { score: number | null; size?: number }) {
   const s = score ?? 0
@@ -16,12 +19,12 @@ export function ScoreRing({ score, size = 28 }: { score: number | null; size?: n
   )
 }
 
-export function RiskBadge({ level }: { level: RiskLevel | null }) {
+export function RiskBadge({ level, d }: { level: RiskLevel | null; d: Dict }) {
   if (!level) return null
   const cls = level === 'LOW' ? 'gl-badge-low' : level === 'MEDIUM' ? 'gl-badge-medium' : 'gl-badge-high'
-  return <span className={`gl-badge ${cls}`}><span className="gl-badge-dot" />{level}</span>
+  return <span className={`gl-badge ${cls}`}><span className="gl-badge-dot" />{d.risk[level]}</span>
 }
 
-export function StatusBadge({ status }: { status: string }) {
-  return <span className={`gl-status gl-status-${status.toLowerCase()}`}>{status}</span>
+export function StatusBadge({ status, d }: { status: 'DRAFT' | 'APPROVED' | 'REJECTED' | 'COMPLETED'; d: Dict }) {
+  return <span className={`gl-status gl-status-${status.toLowerCase()}`}>{d.status[status]}</span>
 }
