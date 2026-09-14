@@ -205,6 +205,14 @@ export default function DealDetailPage() {
                   </div>
                 : <div style={{ padding:'20px 16px', textAlign:'center', fontSize:'0.8rem', color:'var(--green)' }}>✓ No critical margin flags</div>
               }
+              {(deal.kpi_promises.length > 0 || deal.timeline_promises.length > 0 || deal.verbal_promises.length > 0) && (
+                <div style={{ display:'flex', gap:12, padding:'12px 16px', borderTop:'1px solid var(--border)', background:'var(--amber-bg)' }}>
+                  <div style={{ width:20, height:20, borderRadius:4, background:'var(--amber-bg)', color:'var(--amber)', border:'1px solid var(--amber-border)', display:'grid', placeItems:'center', fontSize:'0.65rem', fontWeight:700, flexShrink:0, marginTop:1 }}>i</div>
+                  <div style={{ fontSize:'0.78rem', lineHeight:1.45, color:'var(--amber)' }}>
+                    Dit cijfer beoordeelt marge en aantallen, niet of je beloftes realistisch zijn. Bekijk altijd de <strong>AI Risk Analysis</strong> hieronder voor een inhoudelijke check.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="gl-card">
