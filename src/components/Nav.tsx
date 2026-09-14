@@ -17,6 +17,7 @@ export default function Nav({ breadcrumbs, actions }: { breadcrumbs?: Crumb[]; a
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/dashboard/completed', label: 'Completed' },
     { href: '/settings', label: 'Settings' },
   ]
 

@@ -25,7 +25,7 @@ export interface Deliverables {
   custom: string[]
 }
 
-export type DealStatus = 'DRAFT' | 'APPROVED' | 'REJECTED'
+export type DealStatus = 'DRAFT' | 'APPROVED' | 'REJECTED' | 'COMPLETED'
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH'
 
 export interface Deal {

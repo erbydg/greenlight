@@ -58,6 +58,7 @@ body {
 .gl-status-draft    { background:var(--bg);       border-color:var(--border);        color:var(--text-muted); }
 .gl-status-approved { background:var(--green-bg); border-color:var(--green-border);  color:var(--green); }
 .gl-status-rejected { background:var(--red-bg);   border-color:var(--red-border);    color:var(--red); }
+.gl-status-completed { background:var(--bg);      border-color:var(--border);        color:var(--text-muted); }
 .gl-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border-radius:6px; font-family:'Instrument Sans',sans-serif; font-size:0.78rem; font-weight:500; cursor:pointer; transition:all 0.12s; text-decoration:none; border:none; white-space:nowrap; }
 .gl-btn-primary { background:var(--ink); color:#fff; }
 .gl-btn-primary:hover { opacity:0.85; }

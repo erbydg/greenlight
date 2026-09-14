@@ -5,34 +5,10 @@ import { getAgencyId } from '@/lib/supabase-server'
 import { getAllDeals } from '@/lib/supabase'
 import { formatEuro } from '@/lib/profitability'
 import Nav from '@/components/Nav'
+import { ScoreRing, RiskBadge, StatusBadge } from '@/components/DealBadges'
+import DealStatusButton from '@/components/DealStatusButton'
 import { createClient } from '@supabase/supabase-js'
-import type { Deal, RiskLevel } from '@/types/deal'
-
-function ScoreRing({ score }: { score: number | null }) {
-  const s = score ?? 0
-  const r = 11, circ = 2 * Math.PI * r
-  const offset = circ - (s / 100) * circ
-  const color = s >= 70 ? 'var(--green)' : s >= 45 ? 'var(--amber)' : 'var(--red)'
-  return (
-    <div className="gl-score-ring" style={{ width:28, height:28 }}>
-      <svg width="28" height="28" viewBox="0 0 28 28">
-        <circle cx="14" cy="14" r={r} fill="none" stroke="var(--border)" strokeWidth="3"/>
-        <circle cx="14" cy="14" r={r} fill="none" stroke={color} strokeWidth="3"
-          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"/>
-      </svg>
-    </div>
-  )
-}
-
-function RiskBadge({ level }: { level: RiskLevel | null }) {
-  if (!level) return null
-  const cls = level === 'LOW' ? 'gl-badge-low' : level === 'MEDIUM' ? 'gl-badge-medium' : 'gl-badge-high'
-  return <span className={`gl-badge ${cls}`}><span className="gl-badge-dot"/>{level}</span>
-}
-
-function StatusBadge({ status }: { status: string }) {
-  return <span className={`gl-status gl-status-${status.toLowerCase()}`}>{status}</span>
-}
+import type { Deal } from '@/types/deal'
 
 export default async function DashboardPage() {
   const agencyId = await getAgencyId()
@@ -46,9 +22,10 @@ export default async function DashboardPage() {
     : 0
   const isTrialExpired = plan === 'trial' && trialDaysElapsed > 14
 
-  let deals: Deal[] = []
+  let allDeals: Deal[] = []
   let dbError = false
-  try { deals = await getAllDeals(agencyId) } catch { dbError = true }
+  try { allDeals = await getAllDeals(agencyId) } catch { dbError = true }
+  const deals = allDeals.filter(d => d.status !== 'COMPLETED')
 
   const isLimited = isTrialExpired
 
@@ -112,30 +89,39 @@ export default async function DashboardPage() {
         <div className="gl-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
             <div className="font-heading" style={{ fontSize: '0.9rem', fontWeight: 600 }}>All Deals</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{totalDeals} deal{totalDeals !== 1 ? 's' : ''}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{totalDeals} deal{totalDeals !== 1 ? 's' : ''}</div>
+              <Link href="/dashboard/completed" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'none' }}>Completed →</Link>
+            </div>
           </div>
 
           {deals.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '56px 24px' }}>
               <div style={{ fontSize: '2rem', marginBottom: 12 }}>📋</div>
-              <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>No deals yet</div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 24, maxWidth: 320, margin: '0 auto 24px' }}>
-                Create your first deal to see your profitability analysis here.
+              <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>
+                {allDeals.length > 0 ? 'No active deals' : 'No deals yet'}
               </div>
-              <Link href="/deals/new" className="gl-btn gl-btn-primary">Create first deal</Link>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 24, maxWidth: 320, margin: '0 auto 24px' }}>
+                {allDeals.length > 0
+                  ? 'All your deals are marked as completed.'
+                  : 'Create your first deal to see your profitability analysis here.'}
+              </div>
+              {allDeals.length > 0
+                ? <Link href="/dashboard/completed" className="gl-btn gl-btn-ghost">View completed deals</Link>
+                : <Link href="/deals/new" className="gl-btn gl-btn-primary">Create first deal</Link>}
             </div>
           ) : (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
-                {['Client', 'Retainer', 'Margin', 'Risk', 'Status', ''].map(h => (
-                  <div key={h} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+                {['Client', 'Retainer', 'Margin', 'Risk', 'Status', '', ''].map((h, i) => (
+                  <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                 ))}
               </div>
               {deals.map(deal => {
                 const mp = deal.margin_percent ?? 0
                 const mc = mp >= 30 ? 'var(--green)' : mp >= 20 ? 'var(--amber)' : 'var(--red)'
                 return (
-                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center', transition: 'background 0.12s' }}>
+                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center', transition: 'background 0.12s' }}>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{deal.client_name}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{deal.industry} · {deal.contract_duration}mo</div>
@@ -147,6 +133,7 @@ export default async function DashboardPage() {
                     </div>
                     <RiskBadge level={deal.scope_risk_level} />
                     <StatusBadge status={deal.status} />
+                    <DealStatusButton dealId={deal.id} targetStatus="COMPLETED" label="✓ Done" title="Mark as completed" />
                     <Link href={`/deals/${deal.id}`} style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
                   </div>
                 )
