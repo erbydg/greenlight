@@ -11,10 +11,23 @@ export interface GeneratedDocuments {
   kickoffPlan: string
 }
 
-export async function generateDealDocuments(deal: Deal, flags: string[], locale: Locale = 'nl'): Promise<GeneratedDocuments> {
+// Sommige modellen leveren toch een inleidende/afsluitende zin af ondanks de
+// instructie om die weg te laten. Deze regels worden als vangnet verwijderd
+// voordat het document opgeslagen/getoond wordt.
+const LEAKED_PREAMBLE = /^((oké|ok|okay|zeker|natuurlijk|absoluut|prima|goed)[,!.]?\s+)?(hier is|hierbij|hieronder|hier komt|hier heb je|hier volgt)[^\n]*\n+(-{3,}\s*\n+)?/i
+const LEAKED_TRAILER = /\n+(ik hoop dat dit (helpt|nuttig is)|laat (het |gerust )?weten (als|indien)[^\n]*|veel succes[^\n]*)[.!]?\s*$/i
+
+export function stripChatArtifacts(text: string): string {
+  return text.replace(LEAKED_PREAMBLE, '').replace(LEAKED_TRAILER, '').trim()
+}
+
+export async function generateDealDocuments(deal: Deal, flags: string[], locale: Locale = 'nl', agencyName?: string | null): Promise<GeneratedDocuments> {
   const languageInstruction = locale === 'nl'
     ? 'Schrijf je volledige antwoord in het Nederlands.'
     : 'Write your entire response in English.'
+  const noPreambleInstruction = locale === 'nl'
+    ? 'Geef ALLEEN de inhoud van het document terug. Begin direct met de eerste regel van het document zelf — geen inleidende zin, bevestiging of meta-commentaar (bv. geen "Oké, hier is...", "Absoluut!", "Hierbij het document..."). Voeg ook geen afsluitende zin toe zoals "Ik hoop dat dit helpt". Vul elk gegeven feit (datum, bureaunaam, klantnaam, bedragen) letterlijk in — gebruik nooit placeholders zoals [Datum] of [Bureau Naam].'
+    : 'Return ONLY the content of the document itself. Start directly with the first line of the document — no introductory sentence, confirmation or meta-commentary (e.g. no "Sure, here is...", "Absolutely!", "Here is the document..."). Do not add a closing sentence like "I hope this helps" either. Fill in every given fact (date, agency name, client name, amounts) literally — never use placeholders like [Date] or [Agency Name].'
   const allDeliverables = [
     ...deal.deliverables.paidAds,
     ...deal.deliverables.seo,
@@ -24,9 +37,22 @@ export async function generateDealDocuments(deal: Deal, flags: string[], locale:
     ...deal.deliverables.custom,
   ]
 
+  const today = new Date().toLocaleDateString(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+
+  const adSpendLine = !deal.ad_spend
+    ? 'ADVERTENTIEBUDGET: geen'
+    : deal.ad_spend_through_agency
+      ? `ADVERTENTIEBUDGET: €${deal.ad_spend}/maand — loopt via het bureau (het bureau factureert/beheert dit budget, het telt mee als kost in de marge)`
+      : `ADVERTENTIEBUDGET: €${deal.ad_spend}/maand — de klant betaalt het platform rechtstreeks (het bureau beheert dit budget niet en het telt niet mee als kost)`
+
   const ctx = [
+    'HUIDIGE DATUM: ' + today,
+    'BUREAU: ' + (agencyName || 'Onze agency'),
     'CLIENT: ' + deal.client_name + ' (' + deal.industry + ')',
     'CONTRACT: ' + deal.contract_duration + ' maanden @ ' + deal.monthly_retainer + '/m',
+    adSpendLine,
     'MARGE: ' + (deal.margin_percent?.toFixed(1) ?? '?') + '%',
     'SCOPE RISICO: ' + deal.scope_risk_level,
     'MARGIN SCORE: ' + deal.margin_score + '/100',
@@ -43,9 +69,9 @@ export async function generateDealDocuments(deal: Deal, flags: string[], locale:
   const ask = async (prompt: string) => {
     const response = await getAI().models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: languageInstruction + ' ' + prompt + '\n\n' + ctx,
+      contents: languageInstruction + ' ' + noPreambleInstruction + ' ' + prompt + '\n\n' + ctx,
     })
-    return response.text ?? ''
+    return stripChatArtifacts(response.text ?? '')
   }
 
   const [riskSummary, scopeLockDoc, handoverBrief, kickoffPlan] = await Promise.all([

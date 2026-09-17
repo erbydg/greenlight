@@ -6,6 +6,7 @@ import Nav from '@/components/Nav'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import type { getDictionary } from '@/lib/i18n/translations'
 import type { DealFormData, TeamMember } from '@/types/deal'
+import { calculateProfitability } from '@/lib/profitability'
 
 type Dict = ReturnType<typeof getDictionary>
 
@@ -249,15 +250,8 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
   const updDel = (k: keyof DealFormData['deliverables'], v: string[]) => setForm(p=>({...p,deliverables:{...p.deliverables,[k]:v}}))
   const toggleSection = (n: number) => setOpen(s=>s.includes(n)?s.filter(x=>x!==n):[...s,n])
 
-  const totalCost = form.team_roles.reduce((s,r) => {
-    if (r.mode === 'team') return s + (r.monthlyCost||0) * (r.allocationPercent||0) / 100
-    return s + r.hourlyCost * r.monthlyHours
-  }, 0)
-  const margin = form.monthly_retainer - totalCost
-  const marginPct = form.monthly_retainer > 0 ? (margin/form.monthly_retainer)*100 : 0
-  const totalProfit = margin * form.contract_duration + (form.setup_fee||0)
-  const score = Math.max(0, Math.min(100, Math.round(marginPct*1.4) - (Object.values(form.deliverables).flat().length>10?8:0)))
-  const risk = marginPct < 20 || score < 35 ? 'HIGH' : marginPct < 30 || score < 55 ? 'MEDIUM' : 'LOW'
+  const { total_monthly_cost: totalCost, gross_margin: margin, margin_percent: marginPct,
+    total_projected_profit: totalProfit, margin_score: score, scope_risk_level: risk } = calculateProfitability(form)
   const riskColor = risk==='HIGH'?'var(--red)':risk==='MEDIUM'?'var(--amber)':'var(--green)'
   const marginColor = marginPct>=30?'var(--green)':marginPct>=20?'var(--amber)':'var(--red)'
   const hasCalc = form.monthly_retainer > 0 && totalCost > 0

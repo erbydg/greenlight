@@ -4,6 +4,8 @@ export const runtime = 'edge'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import Nav from '@/components/Nav'
 import { formatEuro } from '@/lib/profitability'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
@@ -30,14 +32,8 @@ function ScoreRing({ score }: { score: number | null }) {
 }
 
 function DocContent({ content }: { content: string }) {
-  const html = content
-    .replace(/^### (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^## (.+)$/gm,  '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm,   '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
-    .split('\n\n').map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('')
+  const rawHtml = marked.parse(content, { async: false, gfm: true, breaks: true })
+  const html = DOMPurify.sanitize(rawHtml)
   return <div className="gl-doc" dangerouslySetInnerHTML={{ __html: html }}/>
 }
 

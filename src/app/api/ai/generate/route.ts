@@ -36,8 +36,14 @@ export async function POST(request: Request) {
       verbal_promises: deal.verbal_promises, exclusions: deal.exclusions,
     }
 
+    const { data: agency } = await getServiceClient()
+      .from('agencies')
+      .select('name')
+      .eq('id', deal.agency_id)
+      .single()
+
     const { flags } = calculateProfitability(formData)
-    const documents = await generateDealDocuments(deal, flags, locale)
+    const documents = await generateDealDocuments(deal, flags, locale, agency?.name)
 
     const { data: updatedDeal, error: updateError } = await getServiceClient()
       .from('deals')

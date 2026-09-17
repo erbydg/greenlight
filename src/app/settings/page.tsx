@@ -27,12 +27,41 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', role: '', monthly_cost: '' })
 
+  const [agencyName, setAgencyName] = useState('')
+  const [agencyNameInput, setAgencyNameInput] = useState('')
+  const [agencyLoading, setAgencyLoading] = useState(true)
+  const [agencySaving, setAgencySaving] = useState(false)
+  const [agencyError, setAgencyError] = useState<string | null>(null)
+  const [agencySaved, setAgencySaved] = useState(false)
+
   useEffect(() => {
     fetch('/api/team')
       .then(r => r.json())
       .then(data => { setMembers(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
+    fetch('/api/agency')
+      .then(r => r.json())
+      .then(data => { setAgencyName(data.name || ''); setAgencyNameInput(data.name || ''); setAgencyLoading(false) })
+      .catch(() => setAgencyLoading(false))
   }, [])
+
+  const handleSaveAgencyName = async () => {
+    if (!agencyNameInput.trim()) return
+    setAgencySaving(true); setAgencyError(null); setAgencySaved(false)
+    const res = await fetch('/api/agency', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: agencyNameInput.trim() })
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setAgencyName(data.name)
+      setAgencySaved(true)
+    } else {
+      setAgencyError(d.settings.saveError)
+    }
+    setAgencySaving(false)
+  }
 
   const handleAdd = async () => {
     if (!form.name || !form.role || !form.monthly_cost) return
@@ -68,6 +97,38 @@ export default function SettingsPage() {
         <div style={{ marginBottom: 32 }}>
           <h1 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 6 }}>{d.settings.title}</h1>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.settings.sub}</p>
+        </div>
+
+        <div className="gl-card" style={{ marginBottom: 16 }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600 }}>{d.settings.agencyName}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{d.settings.agencyNameNote}</div>
+          </div>
+          <div style={{ padding: '16px 24px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            {agencyLoading ? (
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.common.loading}</div>
+            ) : (
+              <>
+                <input
+                  className="gl-input"
+                  style={{ flex: 1 }}
+                  value={agencyNameInput}
+                  onChange={e => { setAgencyNameInput(e.target.value); setAgencySaved(false) }}
+                  placeholder={d.settings.agencyNamePlaceholder}
+                />
+                <button
+                  onClick={handleSaveAgencyName}
+                  disabled={agencySaving || !agencyNameInput.trim() || agencyNameInput.trim() === agencyName}
+                  className="gl-btn gl-btn-primary"
+                  style={{ opacity: agencySaving ? 0.7 : 1, flexShrink: 0 }}
+                >
+                  {agencySaving ? d.settings.savingMember : d.common.save}
+                </button>
+              </>
+            )}
+          </div>
+          {agencyError && <div style={{ margin: '0 24px 16px', background: 'var(--red-bg)', border: '1px solid var(--red-border)', borderRadius: 6, padding: '8px 12px', fontSize: '0.8rem', color: 'var(--red)' }}>{agencyError}</div>}
+          {agencySaved && !agencyError && <div style={{ margin: '0 24px 16px', fontSize: '0.78rem', color: 'var(--green)' }}>{d.settings.agencyNameSaved}</div>}
         </div>
 
         <div className="gl-card" style={{ marginBottom: 16 }}>
