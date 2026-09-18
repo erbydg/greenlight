@@ -1,6 +1,7 @@
 export const runtime = 'edge'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendResultEmail } from '@/lib/email'
 
 function getServiceClient() {
   return createClient(
@@ -24,6 +25,13 @@ export async function POST(request: Request) {
       return Number.isFinite(n) ? n : 0
     }
 
+    const locale = typeof body.locale === 'string' ? body.locale : null
+    const totalMonthlyCost = num(body.total_monthly_cost)
+    const grossMargin = num(body.gross_margin)
+    const marginPercent = num(body.margin_percent)
+    const marginScore = num(body.margin_score)
+    const totalProfit = num(body.total_profit)
+
     const { error } = await getServiceClient().from('free_check_leads').insert({
       email,
       monthly_retainer: num(body.monthly_retainer),
@@ -33,14 +41,21 @@ export async function POST(request: Request) {
       hourly_rate: num(body.hourly_rate),
       ad_spend: num(body.ad_spend),
       ad_through_agency: !!body.ad_through_agency,
-      total_monthly_cost: num(body.total_monthly_cost),
-      gross_margin: num(body.gross_margin),
-      margin_percent: num(body.margin_percent),
-      margin_score: num(body.margin_score),
-      total_profit: num(body.total_profit),
-      locale: typeof body.locale === 'string' ? body.locale : null,
+      total_monthly_cost: totalMonthlyCost,
+      gross_margin: grossMargin,
+      margin_percent: marginPercent,
+      margin_score: marginScore,
+      total_profit: totalProfit,
+      locale,
     })
     if (error) throw error
+
+    await sendResultEmail({
+      to: email,
+      locale,
+      appUrl: new URL(request.url).origin,
+      totalMonthlyCost, grossMargin, marginPercent, marginScore, totalProfit,
+    })
 
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch {
