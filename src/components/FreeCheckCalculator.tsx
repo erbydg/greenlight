@@ -6,7 +6,7 @@ import type { DealFormData } from '@/types/deal'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 
 export default function FreeCheckCalculator({ id }: { id?: string } = {}) {
-  const { d } = useLocale()
+  const { d, locale } = useLocale()
   const t = d.landing.freeCheck
 
   const [retainer, setRetainer] = useState(4500)
@@ -16,6 +16,11 @@ export default function FreeCheckCalculator({ id }: { id?: string } = {}) {
   const [hourlyRate, setHourlyRate] = useState(65)
   const [adSpend, setAdSpend] = useState(3000)
   const [adThroughAgency, setAdThroughAgency] = useState(true)
+
+  const [leadEmail, setLeadEmail] = useState('')
+  const [leadSending, setLeadSending] = useState(false)
+  const [leadSent, setLeadSent] = useState(false)
+  const [leadError, setLeadError] = useState<string | null>(null)
 
   const formData: DealFormData = {
     client_name: '', industry: '', contract_duration: duration,
@@ -37,6 +42,32 @@ export default function FreeCheckCalculator({ id }: { id?: string } = {}) {
     : result.scope_risk_level === 'HIGH' ? t.messageHigh
     : result.scope_risk_level === 'MEDIUM' ? t.messageMedium
     : t.messageHealthy
+
+  const handleSaveLead = async () => {
+    if (!leadEmail.trim()) return
+    setLeadSending(true); setLeadError(null); setLeadSent(false)
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: leadEmail.trim(),
+          monthly_retainer: retainer, contract_duration: duration, setup_fee: setupFee,
+          hours, hourly_rate: hourlyRate, ad_spend: adSpend, ad_through_agency: adThroughAgency,
+          total_monthly_cost: result.total_monthly_cost, gross_margin: result.gross_margin,
+          margin_percent: result.margin_percent, margin_score: result.margin_score,
+          total_profit: totalProfit, locale,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setLeadSent(true)
+      setLeadEmail('')
+    } catch {
+      setLeadError(t.leadError)
+    } finally {
+      setLeadSending(false)
+    }
+  }
 
   return (
     <section id={id} className="lp-calc-wrap">
@@ -134,6 +165,24 @@ export default function FreeCheckCalculator({ id }: { id?: string } = {}) {
                 <div style={{ width: `${result.margin_score}%`, background: scoreColor }}/>
               </div>
               <div className="lp-calc-score-msg" style={{ color: scoreColor }}>{message}</div>
+            </div>
+
+            <div className="lp-calc-lead">
+              <div className="lp-calc-lead-label">{t.leadLabel}</div>
+              <div className="lp-calc-lead-row">
+                <input
+                  type="email"
+                  value={leadEmail}
+                  onChange={e => { setLeadEmail(e.target.value); setLeadSent(false); setLeadError(null) }}
+                  placeholder={t.leadPlaceholder}
+                />
+                <button onClick={handleSaveLead} disabled={leadSending || !leadEmail.trim()} className="lp-calc-lead-btn">
+                  {leadSending ? t.leadSending : t.leadButton}
+                </button>
+              </div>
+              {leadSent && !leadError && <div className="lp-calc-lead-msg lp-calc-lead-ok">{t.leadSent}</div>}
+              {leadError && <div className="lp-calc-lead-msg lp-calc-lead-err">{leadError}</div>}
+              {!leadSent && !leadError && <div className="lp-calc-note">{t.leadNote}</div>}
             </div>
 
             <div className="lp-calc-footer-note">{t.footerNote}</div>

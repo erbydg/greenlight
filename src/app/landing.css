@@ -128,6 +128,16 @@
 .lp-calc-score-bar { height: 5px; background: #e4e1db; border-radius: 3px; overflow: hidden; margin: 10px 0; }
 .lp-calc-score-bar div { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
 .lp-calc-score-msg { font-size: 0.8rem; font-weight: 500; }
+.lp-calc-lead { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e4e1db; }
+.lp-calc-lead-label { font-size: 0.78rem; font-weight: 600; color: #1c1b18; margin-bottom: 8px; }
+.lp-calc-lead-row { display: flex; gap: 8px; }
+.lp-calc-lead-row input { flex: 1; min-width: 0; border: 1px solid #e4e1db; border-radius: 7px; background: #fdfcfa; padding: 9px 10px; font-size: 0.82rem; font-family: inherit; color: #1c1b18; outline: none; }
+.lp-calc-lead-row input:focus { border-color: #16a34a; }
+.lp-calc-lead-btn { flex-shrink: 0; background: #1c1b18; color: #fff; font-size: 0.78rem; font-weight: 500; padding: 9px 16px; border-radius: 7px; border: none; cursor: pointer; font-family: inherit; }
+.lp-calc-lead-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.lp-calc-lead-msg { font-size: 0.74rem; margin-top: 8px; }
+.lp-calc-lead-ok { color: #16a34a; }
+.lp-calc-lead-err { color: #dc2626; }
 .lp-calc-footer-note { font-size: 0.74rem; color: #8a8780; line-height: 1.55; margin-top: 20px; }
 .lp-calc-cta { width: 100%; justify-content: center; margin-top: 14px; }
 .lp-calc-disclaimer { font-size: 0.66rem; color: #b8b4ab; margin-top: 10px; text-align: center; }
