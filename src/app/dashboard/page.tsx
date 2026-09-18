@@ -55,7 +55,7 @@ export default async function DashboardPage() {
           <div style={{fontSize:'0.82rem',color:'#d97706'}}>
             <strong>{d.dashboard.trialEndedStrong}</strong> {d.dashboard.trialEndedBody}
           </div>
-          <a href="mailto:bas@getgreenlight.io?subject=Upgrade Greenlight" style={{display:'inline-flex',alignItems:'center',gap:6,background:'#d97706',color:'#fff',padding:'7px 16px',borderRadius:6,fontSize:'0.78rem',fontWeight:500,textDecoration:'none'}}>
+          <a href="mailto:bas.greenlight@gmail.com?subject=Upgrade Greenlight" style={{display:'inline-flex',alignItems:'center',gap:6,background:'#d97706',color:'#fff',padding:'7px 16px',borderRadius:6,fontSize:'0.78rem',fontWeight:500,textDecoration:'none'}}>
             {d.dashboard.upgrade}
           </a>
         </div>
