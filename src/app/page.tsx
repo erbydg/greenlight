@@ -4,6 +4,7 @@ import Link from 'next/link'
 import './landing.css'
 import { getServerDictionary } from '@/lib/i18n/server'
 import LocaleToggle from '@/components/LocaleToggle'
+import FreeCheckCalculator from '@/components/FreeCheckCalculator'
 
 export default async function LandingPage() {
   const { d } = await getServerDictionary()
@@ -52,6 +53,8 @@ export default async function LandingPage() {
           <span>{t.proof}</span>
         </div>
       </section>
+
+      <FreeCheckCalculator/>
 
       <section className="lp-pain">
         <div className="lp-pain-inner">

@@ -251,7 +251,8 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
   const toggleSection = (n: number) => setOpen(s=>s.includes(n)?s.filter(x=>x!==n):[...s,n])
 
   const { total_monthly_cost: totalCost, gross_margin: margin, margin_percent: marginPct,
-    total_projected_profit: totalProfit, margin_score: score, scope_risk_level: risk } = calculateProfitability(form)
+    total_projected_profit, margin_score: score, scope_risk_level: risk } = calculateProfitability(form)
+  const totalProfit = total_projected_profit + (form.setup_fee || 0)
   const riskColor = risk==='HIGH'?'var(--red)':risk==='MEDIUM'?'var(--amber)':'var(--green)'
   const marginColor = marginPct>=30?'var(--green)':marginPct>=20?'var(--amber)':'var(--red)'
   const hasCalc = form.monthly_retainer > 0 && totalCost > 0
