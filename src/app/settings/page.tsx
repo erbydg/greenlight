@@ -29,6 +29,9 @@ export default function SettingsPage() {
 
   const [agencyName, setAgencyName] = useState('')
   const [agencyNameInput, setAgencyNameInput] = useState('')
+  const [signatureNameInput, setSignatureNameInput] = useState('')
+  const [signatureTitleInput, setSignatureTitleInput] = useState('')
+  const [savedAgency, setSavedAgency] = useState({ name: '', signature_name: '', signature_title: '' })
   const [agencyLoading, setAgencyLoading] = useState(true)
   const [agencySaving, setAgencySaving] = useState(false)
   const [agencyError, setAgencyError] = useState<string | null>(null)
@@ -41,9 +44,20 @@ export default function SettingsPage() {
       .catch(() => setLoading(false))
     fetch('/api/agency')
       .then(r => r.json())
-      .then(data => { setAgencyName(data.name || ''); setAgencyNameInput(data.name || ''); setAgencyLoading(false) })
+      .then(data => {
+        setAgencyName(data.name || '')
+        setAgencyNameInput(data.name || '')
+        setSignatureNameInput(data.signature_name || '')
+        setSignatureTitleInput(data.signature_title || '')
+        setSavedAgency({ name: data.name || '', signature_name: data.signature_name || '', signature_title: data.signature_title || '' })
+        setAgencyLoading(false)
+      })
       .catch(() => setAgencyLoading(false))
   }, [])
+
+  const agencyDirty = agencyNameInput.trim() !== savedAgency.name
+    || signatureNameInput.trim() !== savedAgency.signature_name
+    || signatureTitleInput.trim() !== savedAgency.signature_title
 
   const handleSaveAgencyName = async () => {
     if (!agencyNameInput.trim()) return
@@ -51,11 +65,16 @@ export default function SettingsPage() {
     const res = await fetch('/api/agency', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: agencyNameInput.trim() })
+      body: JSON.stringify({
+        name: agencyNameInput.trim(),
+        signature_name: signatureNameInput.trim(),
+        signature_title: signatureTitleInput.trim(),
+      })
     })
     if (res.ok) {
       const data = await res.json()
       setAgencyName(data.name)
+      setSavedAgency({ name: data.name || '', signature_name: data.signature_name || '', signature_title: data.signature_title || '' })
       setAgencySaved(true)
     } else {
       setAgencyError(d.settings.saveError)
@@ -104,23 +123,46 @@ export default function SettingsPage() {
             <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600 }}>{d.settings.agencyName}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{d.settings.agencyNameNote}</div>
           </div>
-          <div style={{ padding: '16px 24px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <div style={{ padding: '16px 24px' }}>
             {agencyLoading ? (
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.common.loading}</div>
             ) : (
               <>
                 <input
                   className="gl-input"
-                  style={{ flex: 1 }}
+                  style={{ marginBottom: 14 }}
                   value={agencyNameInput}
                   onChange={e => { setAgencyNameInput(e.target.value); setAgencySaved(false) }}
                   placeholder={d.settings.agencyNamePlaceholder}
                 />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 6 }}>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{d.settings.signatureName}</div>
+                    <input
+                      className="gl-input"
+                      value={signatureNameInput}
+                      onChange={e => { setSignatureNameInput(e.target.value); setAgencySaved(false) }}
+                      placeholder={d.settings.signatureNamePlaceholder}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{d.settings.signatureTitle}</div>
+                    <input
+                      className="gl-input"
+                      value={signatureTitleInput}
+                      onChange={e => { setSignatureTitleInput(e.target.value); setAgencySaved(false) }}
+                      placeholder={d.settings.signatureTitlePlaceholder}
+                    />
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-light)', marginBottom: 14 }}>{d.settings.signatureNote}</div>
+
                 <button
                   onClick={handleSaveAgencyName}
-                  disabled={agencySaving || !agencyNameInput.trim() || agencyNameInput.trim() === agencyName}
+                  disabled={agencySaving || !agencyNameInput.trim() || !agencyDirty}
                   className="gl-btn gl-btn-primary"
-                  style={{ opacity: agencySaving ? 0.7 : 1, flexShrink: 0 }}
+                  style={{ opacity: agencySaving ? 0.7 : 1 }}
                 >
                   {agencySaving ? d.settings.savingMember : d.common.save}
                 </button>

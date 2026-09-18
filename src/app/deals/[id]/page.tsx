@@ -51,11 +51,21 @@ async function downloadPDF(title: string, content: string, filename: string) {
 }
 
 const DOC_FIELDS = ['ai_risk_summary', 'ai_scope_lock_doc', 'ai_handover_brief', 'ai_kickoff_plan'] as const
+const SIGNABLE_TABS = ['scope', 'kickoff']
+
+interface AgencyInfo { name: string; signature_name: string | null; signature_title: string | null }
+
+function withSignature(content: string, tab: string, agency: AgencyInfo | null): string {
+  if (!agency?.signature_name || !SIGNABLE_TABS.includes(tab)) return content
+  const who = agency.signature_title ? `${agency.signature_name}, ${agency.signature_title}` : agency.signature_name
+  return `${content}\n\n---\n\n*${who}*\n\n**${agency.name}**`
+}
 
 export default function DealDetailPage() {
   const params = useParams()
   const { locale, d } = useLocale()
   const [deal, setDeal] = useState<Deal | null>(null)
+  const [agency, setAgency] = useState<AgencyInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [activeTab, setActiveTab] = useState('risk')
@@ -69,6 +79,10 @@ export default function DealDetailPage() {
       .then(r => r.json())
       .then(dl => { setDeal(dl); setLoading(false) })
       .catch(() => { setError(d.dealDetail.notFound); setLoading(false) })
+    fetch('/api/agency')
+      .then(r => r.json())
+      .then(data => setAgency(data.name ? data : null))
+      .catch(() => {})
   }, [params.id, d.dealDetail.notFound])
 
   const updateStatus = async (status: string) => {
@@ -116,7 +130,8 @@ export default function DealDetailPage() {
   const marginColor = marginPct >= 30 ? 'var(--green)' : marginPct >= 20 ? 'var(--amber)' : 'var(--red)'
   const hasDocuments = !!(deal.ai_risk_summary || deal.ai_scope_lock_doc)
   const activeTabDef = TABS.find(t => t.key === activeTab)!
-  const activeContent = deal[activeTabDef.field]
+  const rawContent = deal[activeTabDef.field]
+  const activeContent = rawContent ? withSignature(rawContent, activeTab, agency) : rawContent
   const totalProfit = (deal.total_projected_profit ?? 0) + (deal.setup_fee ?? 0)
 
   return (
