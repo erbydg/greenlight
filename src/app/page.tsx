@@ -26,10 +26,12 @@ export default async function LandingPage() {
           <span className="lp-logo-name">Greenlight</span>
         </a>
         <div className="lp-nav-links">
+          <a href="#free-check" className="lp-nav-link">{t.navFreeCheck}</a>
           <a href="#how" className="lp-nav-link">{t.navHow}</a>
           <Link href="/login" className="lp-nav-link">{t.navSignIn}</Link>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <span className="lp-trial-badge">{t.navTrialBadge}</span>
           <LocaleToggle />
           <Link href="/signup" className="lp-nav-cta">
             {t.navCta}
@@ -54,7 +56,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <FreeCheckCalculator/>
+      <FreeCheckCalculator id="free-check"/>
 
       <section className="lp-pain">
         <div className="lp-pain-inner">

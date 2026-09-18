@@ -5,7 +5,7 @@ import { calculateProfitability, formatEuro } from '@/lib/profitability'
 import type { DealFormData } from '@/types/deal'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 
-export default function FreeCheckCalculator() {
+export default function FreeCheckCalculator({ id }: { id?: string } = {}) {
   const { d } = useLocale()
   const t = d.landing.freeCheck
 
@@ -39,7 +39,7 @@ export default function FreeCheckCalculator() {
     : t.messageHealthy
 
   return (
-    <section className="lp-calc-wrap">
+    <section id={id} className="lp-calc-wrap">
       <div className="lp-calc-inner">
         <div className="lp-calc-intro">
           <div className="lp-eyebrow" style={{ marginBottom: 14 }}><span className="lp-eyebrow-dot"/>{t.eyebrow}</div>

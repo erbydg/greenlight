@@ -6,6 +6,7 @@ const en = {
     completed: 'Completed',
     settings: 'Settings',
     signOut: 'Sign out',
+    trialBadge: 'Free during beta — full premium access',
   },
   common: {
     loading: 'Loading…',
@@ -28,8 +29,10 @@ const en = {
   },
   landing: {
     navHow: 'How it works',
+    navFreeCheck: 'Free check',
     navSignIn: 'Sign in',
     navCta: 'Start free trial',
+    navTrialBadge: '🎉 Free during beta',
     eyebrow: 'Built for marketing agencies',
     h1a: 'Know if a deal is ',
     h1em: 'actually profitable',
@@ -37,7 +40,7 @@ const en = {
     sub: 'Greenlight calculates your true internal cost, detects scope risk, and generates the documents your delivery team needs — in under 5 minutes.',
     ctaPrimary: 'Try free',
     signInArrow: 'Sign in →',
-    proof: 'No credit card required · Cancel anytime',
+    proof: '🎉 Full premium access, free during our beta · No credit card required',
     freeCheck: {
       eyebrow: 'Greenlight — free check',
       title: 'Is this deal worth it, before you say yes?',
@@ -364,6 +367,7 @@ const nl: typeof en = {
     completed: 'Afgewerkt',
     settings: 'Instellingen',
     signOut: 'Afmelden',
+    trialBadge: 'Gratis tijdens bèta — volledige premium-toegang',
   },
   common: {
     loading: 'Laden…',
@@ -386,8 +390,10 @@ const nl: typeof en = {
   },
   landing: {
     navHow: 'Hoe het werkt',
+    navFreeCheck: 'Gratis check',
     navSignIn: 'Inloggen',
     navCta: 'Probeer gratis',
+    navTrialBadge: '🎉 Gratis tijdens bèta',
     eyebrow: 'Gemaakt voor marketingbureaus',
     h1a: 'Weet of een deal ',
     h1em: 'écht winstgevend',
@@ -395,7 +401,7 @@ const nl: typeof en = {
     sub: 'Greenlight berekent je echte interne kostprijs, signaleert scope-risico en genereert de documenten die je deliveryteam nodig heeft — in minder dan 5 minuten.',
     ctaPrimary: 'Probeer gratis',
     signInArrow: 'Inloggen →',
-    proof: 'Geen kredietkaart nodig · Op elk moment opzegbaar',
+    proof: '🎉 Volledige premium-toegang, gratis tijdens onze bèta · Geen kredietkaart nodig',
     freeCheck: {
       eyebrow: 'Greenlight — gratis check',
       title: 'Is deze deal het waard, vóór je ja zegt?',

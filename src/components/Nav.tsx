@@ -64,6 +64,9 @@ export default function Nav({ breadcrumbs, actions }: { breadcrumbs?: Crumb[]; a
       )}
 
       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <span className="gl-badge gl-badge-low" style={{ whiteSpace:'nowrap' }}>
+          <span className="gl-badge-dot"/>{d.nav.trialBadge}
+        </span>
         <LocaleToggle />
         {actions}
         <button onClick={handleLogout} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.75rem', padding:'5px 12px' }}>
