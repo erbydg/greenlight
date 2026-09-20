@@ -145,3 +145,8 @@
   .lp-calc-card { grid-template-columns: 1fr; }
   .lp-calc-form { border-right: none; border-bottom: 1px solid #e4e1db; }
 }
+
+@media (max-width: 768px) {
+  .lp-calc-prefix input, .lp-calc-suffix input, .lp-calc-lead-row input { font-size: 16px; }
+  .lp-btn, .lp-pbtn, .lp-nav-cta, .lp-calc-lead-btn { padding-top: 12px; padding-bottom: 12px; }
+}
