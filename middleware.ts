@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Niet ingelogd op beveiligde route → naar login
-  if (!PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith('/_next') && !pathname.startsWith('/api') && !user) {
+  if (!PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith('/_next') && !pathname.startsWith('/api') && !pathname.startsWith('/share/') && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

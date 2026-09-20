@@ -3,6 +3,7 @@ export const runtime = 'edge'
 
 import { useEffect, useState } from 'react'
 import Nav from '@/components/Nav'
+import { Skel } from '@/components/Skeleton'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 
 interface TeamMember {
@@ -125,7 +126,14 @@ export default function SettingsPage() {
           </div>
           <div style={{ padding: '16px 24px' }}>
             {agencyLoading ? (
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.common.loading}</div>
+              <>
+                <Skel width="100%" height={38} radius={8} style={{ marginBottom: 14 }}/>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                  <Skel width="100%" height={38} radius={8}/>
+                  <Skel width="100%" height={38} radius={8}/>
+                </div>
+                <Skel width={90} height={34} radius={6}/>
+              </>
             ) : (
               <>
                 <input
@@ -193,7 +201,19 @@ export default function SettingsPage() {
 
           <div style={{ padding: '16px 24px' }}>
             {loading && (
-              <div style={{ textAlign: 'center', padding: '32px 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.common.loading}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 14, alignItems: 'center', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px' }}>
+                    <div>
+                      <Skel width={120} height={13} style={{ marginBottom: 6 }}/>
+                      <Skel width={80} height={10}/>
+                    </div>
+                    <Skel width={64} height={18} radius={20}/>
+                    <Skel width={50} height={16}/>
+                    <Skel width={28} height={28} radius={5}/>
+                  </div>
+                ))}
+              </div>
             )}
 
             {!loading && members.length === 0 && !adding && (

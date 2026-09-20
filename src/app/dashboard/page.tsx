@@ -31,6 +31,17 @@ export default async function DashboardPage() {
 
   const isLimited = isTrialExpired
 
+  const DEMO_DEAL = {
+    client_name: d.dashboard.demoClientName,
+    industry: d.dealForm.industries[0],
+    contract_duration: 6,
+    monthly_retainer: 3500,
+    margin_score: 72,
+    margin_percent: 34.2,
+    scope_risk_level: 'LOW' as const,
+    status: 'APPROVED' as const,
+  }
+
   const totalDeals = deals.length
   const avgMargin = totalDeals > 0 ? deals.reduce((s, dl) => s + (dl.margin_percent ?? 0), 0) / totalDeals : 0
   const approved = deals.filter(dl => dl.status === 'APPROVED').length
@@ -97,18 +108,47 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {deals.length === 0 ? (
+          {deals.length === 0 && allDeals.length > 0 ? (
             <div style={{ textAlign: 'center', padding: '56px 24px' }}>
               <div style={{ fontSize: '2rem', marginBottom: 12 }}>📋</div>
-              <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>
-                {allDeals.length > 0 ? d.dashboard.noActiveTitle : d.dashboard.noDealsTitle}
+              <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>{d.dashboard.noActiveTitle}</div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 24, maxWidth: 320, margin: '0 auto 24px' }}>{d.dashboard.noActiveBody}</div>
+              <Link href="/dashboard/completed" className="gl-btn gl-btn-ghost">{d.dashboard.viewCompleted}</Link>
+            </div>
+          ) : deals.length === 0 ? (
+            <div>
+              <div style={{ textAlign: 'center', padding: '40px 24px 28px', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: 12 }}>📋</div>
+                <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>{d.dashboard.noDealsTitle}</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 20, maxWidth: 320, margin: '0 auto 20px' }}>{d.dashboard.noDealsBody}</div>
+                <Link href="/deals/new" className="gl-btn gl-btn-primary">{d.dashboard.createFirst}</Link>
               </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 24, maxWidth: 320, margin: '0 auto 24px' }}>
-                {allDeals.length > 0 ? d.dashboard.noActiveBody : d.dashboard.noDealsBody}
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 24px 4px' }}>
+                <span className="gl-badge gl-badge-medium"><span className="gl-badge-dot" />{d.dashboard.demoLabel}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{d.dashboard.demoCaption}</span>
               </div>
-              {allDeals.length > 0
-                ? <Link href="/dashboard/completed" className="gl-btn gl-btn-ghost">{d.dashboard.viewCompleted}</Link>
-                : <Link href="/deals/new" className="gl-btn gl-btn-primary">{d.dashboard.createFirst}</Link>}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+                {[d.dashboard.colClient, d.dashboard.colRetainer, d.dashboard.colMargin, d.dashboard.colRisk, d.dashboard.colStatus, '', ''].map((h, i) => (
+                  <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '14px 24px', alignItems: 'center', background: 'var(--bg)' }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{DEMO_DEAL.client_name}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{DEMO_DEAL.industry} · {DEMO_DEAL.contract_duration}mo</div>
+                </div>
+                <div className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(DEMO_DEAL.monthly_retainer)}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <ScoreRing score={DEMO_DEAL.margin_score} />
+                  <span className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--green)' }}>{DEMO_DEAL.margin_percent.toFixed(1)}%</span>
+                </div>
+                <RiskBadge level={DEMO_DEAL.scope_risk_level} d={d} />
+                <StatusBadge status={DEMO_DEAL.status} d={d} />
+                <span/>
+                <span style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>→</span>
+              </div>
             </div>
           ) : (
             <div>

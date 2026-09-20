@@ -58,6 +58,8 @@ export interface Deal {
   ai_scope_lock_doc: string | null
   ai_handover_brief: string | null
   ai_kickoff_plan: string | null
+  scope_share_token: string | null
+  handover_share_token: string | null
 }
 
 export interface DealFormData {

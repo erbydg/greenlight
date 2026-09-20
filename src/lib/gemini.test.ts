@@ -23,6 +23,7 @@ function baseDeal(overrides: Partial<Deal> = {}): Deal {
     projected_contract_value: 30000, total_projected_profit: 6000,
     margin_score: 40, scope_risk_level: 'MEDIUM',
     ai_risk_summary: null, ai_scope_lock_doc: null, ai_handover_brief: null, ai_kickoff_plan: null,
+    scope_share_token: null, handover_share_token: null,
     ...overrides,
   }
 }

@@ -40,9 +40,18 @@ body {
 @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.3} }
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 @keyframes lbar   { 0%,100%{transform:scaleY(.4)} 50%{transform:scaleY(1)} }
+@keyframes glShimmer { 0%{background-position:150% 0} 100%{background-position:-50% 0} }
 
 .logo-blink     { animation: blink 2.5s ease-in-out infinite; }
 .animate-fade-up{ animation: fadeUp 0.25s ease forwards; }
+
+.gl-skel {
+  background: linear-gradient(100deg, var(--border) 30%, var(--bg) 50%, var(--border) 70%);
+  background-size: 200% 100%;
+  animation: glShimmer 1.6s ease-in-out infinite;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
 
 .gl-nav { background: var(--surface); border-bottom: 1px solid var(--border); height: 56px; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
 .gl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
@@ -109,3 +118,11 @@ body {
 .gl-team-entry { display:grid; grid-template-columns:1fr 100px 90px 32px; gap:8px; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
 .gl-add-btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; width:100%; border-radius:6px; border:1px dashed var(--border); background:transparent; color:var(--text-muted); font-family:'Instrument Sans',sans-serif; font-size:0.77rem; font-weight:500; cursor:pointer; transition:all 0.15s; }
 .gl-add-btn:hover { border-color:var(--green); color:var(--green); background:var(--green-bg); }
+
+@media (max-width: 768px) {
+  .gl-input, .gl-select, .gl-textarea { font-size: 16px; }
+  .gl-btn { padding: 11px 18px; font-size: 0.85rem; }
+  .gl-tab-btn { padding: 13px 16px; }
+  .gl-check-box { width: 20px; height: 20px; }
+  .gl-check-item { padding: 11px 12px; }
+}

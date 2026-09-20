@@ -5,8 +5,28 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Nav from '@/components/Nav'
 import DealForm from '@/components/DealForm'
+import { Skel } from '@/components/Skeleton'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import type { Deal, DealFormData } from '@/types/deal'
+
+function DealFormSkeleton() {
+  return (
+    <main style={{ maxWidth:720, margin:'0 auto', padding:'40px' }}>
+      <Skel width={200} height={24} style={{ marginBottom:24 }}/>
+      {[0,1,2,3,4].map(i => (
+        <div key={i} className="gl-card" style={{ marginBottom:10 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, padding:'18px 24px' }}>
+            <Skel width={22} height={22} radius={5}/>
+            <div style={{ flex:1 }}>
+              <Skel width={i===0?180:140} height={13} style={{ marginBottom:6 }}/>
+              <Skel width={i===0?260:200} height={10}/>
+            </div>
+          </div>
+        </div>
+      ))}
+    </main>
+  )
+}
 
 function toFormData(deal: Deal): DealFormData {
   return {
@@ -53,7 +73,7 @@ export default function EditDealPage() {
   if (!initialForm) return (
     <>
       <Nav breadcrumbs={[{ label:d.dealForm.breadcrumbDashboard, href:'/dashboard' }, { label:d.dealForm.editLoadingCrumb }]}/>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--text-muted)', fontSize:'0.85rem' }}>{d.dealForm.editLoading}</div>
+      <DealFormSkeleton/>
     </>
   )
 

@@ -4,11 +4,12 @@ export const runtime = 'edge'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 import Nav from '@/components/Nav'
+import DocContent from '@/components/DocContent'
+import { Skel } from '@/components/Skeleton'
 import { formatEuro } from '@/lib/profitability'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { DOC_FIELDS, SHAREABLE_TABS, withSignature, stripMarkdown, downloadPDF, type AgencyInfo, type ShareableDoc } from '@/lib/documents'
 import type { Deal } from '@/types/deal'
 
 function ScoreRing({ score }: { score: number | null }) {
@@ -31,34 +32,82 @@ function ScoreRing({ score }: { score: number | null }) {
   )
 }
 
-function DocContent({ content }: { content: string }) {
-  const rawHtml = marked.parse(content, { async: false, gfm: true, breaks: true })
-  const html = DOMPurify.sanitize(rawHtml)
-  return <div className="gl-doc" dangerouslySetInnerHTML={{ __html: html }}/>
-}
+function DealDetailSkeleton() {
+  return (
+    <main style={{ maxWidth:1020, margin:'0 auto', padding:'40px' }}>
+      <div style={{ marginBottom:28, paddingBottom:24, borderBottom:'1px solid var(--border)' }}>
+        <Skel width={220} height={26} style={{ marginBottom:10 }}/>
+        <div style={{ display:'flex', gap:10 }}>
+          <Skel width={90} height={13}/><Skel width={70} height={13}/><Skel width={100} height={13}/>
+        </div>
+      </div>
 
-async function downloadPDF(title: string, content: string, filename: string) {
-  const { jsPDF } = await import('jspdf')
-  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' })
-  const clean = content.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/^#{1,6}\s+/gm,'').trim()
-  const margin = 20, maxWidth = doc.internal.pageSize.getWidth() - margin * 2
-  doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.text(title, margin, 20)
-  doc.setFontSize(10); doc.setFont('helvetica','normal')
-  const lines = doc.splitTextToSize(clean, maxWidth)
-  let y = 35
-  lines.forEach((line: string) => { if(y>270){doc.addPage();y=20}; doc.text(line,margin,y); y+=5 })
-  doc.save(filename)
-}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 300px', gap:16, marginBottom:16 }}>
+        <div>
+          <div className="gl-card" style={{ marginBottom:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:20, alignItems:'center', padding:'22px 24px' }}>
+              <Skel width={88} height={88} radius={44}/>
+              <div>
+                {[0,1,2,3].map(i => (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
+                    <Skel width={70} height={11}/><Skel width={60} height={11}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:1, background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ background:'var(--surface)', padding:'16px 18px' }}>
+                <Skel width={80} height={10} style={{ marginBottom:10 }}/>
+                <Skel width={70} height={20} style={{ marginBottom:6 }}/>
+                <Skel width={50} height={9}/>
+              </div>
+            ))}
+          </div>
+        </div>
 
-const DOC_FIELDS = ['ai_risk_summary', 'ai_scope_lock_doc', 'ai_handover_brief', 'ai_kickoff_plan'] as const
-const SIGNABLE_TABS = ['scope', 'kickoff']
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <div className="gl-card">
+            <div style={{ padding:'12px 16px', background:'var(--bg)', borderBottom:'1px solid var(--border)' }}><Skel width={80} height={10}/></div>
+            <div style={{ padding:'16px' }}><Skel width="100%" height={40} radius={8}/></div>
+          </div>
+          <div className="gl-card">
+            <div style={{ padding:'12px 16px', background:'var(--bg)', borderBottom:'1px solid var(--border)' }}><Skel width={100} height={10}/></div>
+            <div style={{ padding:16 }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid var(--border)' }}>
+                  <Skel width={90} height={12}/><Skel width={50} height={12}/>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
-interface AgencyInfo { name: string; signature_name: string | null; signature_title: string | null }
+      <div className="gl-card" style={{ marginBottom:16 }}>
+        <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}><Skel width={140} height={10}/></div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:0 }}>
+          {[0,1,2,3,4].map(i => (
+            <div key={i} style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
+              <Skel width={90} height={9} style={{ marginBottom:10 }}/>
+              <Skel width="80%" height={11} style={{ marginBottom:6 }}/>
+              <Skel width="60%" height={11}/>
+            </div>
+          ))}
+        </div>
+      </div>
 
-function withSignature(content: string, tab: string, agency: AgencyInfo | null): string {
-  if (!agency?.signature_name || !SIGNABLE_TABS.includes(tab)) return content
-  const who = agency.signature_title ? `${agency.signature_name}, ${agency.signature_title}` : agency.signature_name
-  return `${content}\n\n---\n\n*${who}*\n\n**${agency.name}**`
+      <div className="gl-card">
+        <div style={{ display:'flex', justifyContent:'space-between', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
+          <Skel width={100} height={10}/><Skel width={90} height={24} radius={6}/>
+        </div>
+        <div style={{ padding:'28px' }}>
+          {[100,95,88,70].map((w,i) => <Skel key={i} width={`${w}%`} height={12} style={{ marginBottom:12 }}/>)}
+        </div>
+      </div>
+    </main>
+  )
 }
 
 export default function DealDetailPage() {
@@ -71,6 +120,9 @@ export default function DealDetailPage() {
   const [activeTab, setActiveTab] = useState('risk')
   const [error, setError] = useState<string | null>(null)
   const [statusLoading, setStatusLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
   const TABS = d.dealDetail.tabs.map((t, i) => ({ ...t, num: i + 1, field: DOC_FIELDS[i] }))
 
@@ -94,6 +146,53 @@ export default function DealDetailPage() {
     setStatusLoading(false)
   }
 
+  const copyToClipboard = async (content: string) => {
+    await navigator.clipboard.writeText(stripMarkdown(content))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const SHARE_TOKEN_FIELD: Record<ShareableDoc, 'scope_share_token' | 'handover_share_token'> = {
+    scope: 'scope_share_token', handover: 'handover_share_token',
+  }
+
+  const shareLink = async (tab: ShareableDoc) => {
+    setShareLoading(true); setError(null)
+    try {
+      let token = deal?.[SHARE_TOKEN_FIELD[tab]] ?? null
+      if (!token) {
+        const res = await fetch(`/api/deals/${params.id}/share`, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ doc: tab }),
+        })
+        if (!res.ok) throw new Error()
+        token = (await res.json()).token
+        setDeal(prev => prev ? { ...prev, [SHARE_TOKEN_FIELD[tab]]: token } : prev)
+      }
+      await navigator.clipboard.writeText(`${window.location.origin}/share/${token}`)
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2000)
+    } catch {
+      setError(d.dealDetail.shareFailed)
+    } finally {
+      setShareLoading(false)
+    }
+  }
+
+  const revokeShareLink = async (tab: ShareableDoc) => {
+    setShareLoading(true); setError(null)
+    try {
+      const res = await fetch(`/api/deals/${params.id}/share`, {
+        method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ doc: tab }),
+      })
+      if (!res.ok) throw new Error()
+      setDeal(prev => prev ? { ...prev, [SHARE_TOKEN_FIELD[tab]]: null } : prev)
+    } catch {
+      setError(d.dealDetail.shareFailed)
+    } finally {
+      setShareLoading(false)
+    }
+  }
+
   const generate = async () => {
     setGenerating(true); setError(null)
     try {
@@ -114,7 +213,7 @@ export default function DealDetailPage() {
   if (loading) return (
     <>
       <Nav breadcrumbs={[{label:d.dealForm.breadcrumbDashboard,href:'/'},{label:d.dealForm.editLoadingCrumb}]}/>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'var(--text-muted)', fontSize:'0.85rem' }}>{d.dealDetail.loading}</div>
+      <DealDetailSkeleton/>
     </>
   )
 
@@ -133,6 +232,9 @@ export default function DealDetailPage() {
   const rawContent = deal[activeTabDef.field]
   const activeContent = rawContent ? withSignature(rawContent, activeTab, agency) : rawContent
   const totalProfit = (deal.total_projected_profit ?? 0) + (deal.setup_fee ?? 0)
+  const shareableTab = SHAREABLE_TABS.includes(activeTab as ShareableDoc) ? (activeTab as ShareableDoc) : null
+  const activeShareToken = shareableTab === 'scope' ? deal.scope_share_token : shareableTab === 'handover' ? deal.handover_share_token : null
+  const activeShareUrl = activeShareToken && typeof window !== 'undefined' ? `${window.location.origin}/share/${activeShareToken}` : null
 
   return (
     <>
@@ -315,7 +417,7 @@ export default function DealDetailPage() {
             <>
               <div className="gl-tab-bar">
                 {TABS.map(tab => (
-                  <button key={tab.key} className={`gl-tab-btn ${activeTab===tab.key?'active':''}`} onClick={()=>setActiveTab(tab.key)}>
+                  <button key={tab.key} className={`gl-tab-btn ${activeTab===tab.key?'active':''}`} onClick={()=>{setActiveTab(tab.key); setCopied(false)}}>
                     <span className="gl-tab-num">{tab.num}</span>{tab.label}
                   </button>
                 ))}
@@ -329,12 +431,46 @@ export default function DealDetailPage() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 28px', borderTop:'1px solid var(--border)', background:'var(--bg)' }}>
                 <span style={{ fontSize:'0.72rem', color:'var(--text-light)' }}>{activeTabDef.note}</span>
                 {activeContent && (
-                  <button onClick={()=>downloadPDF(activeTabDef.label, activeContent, `${deal.client_name}-${activeTab}.pdf`)} className="gl-btn gl-btn-primary" style={{ fontSize:'0.78rem', padding:'8px 18px' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    {d.dealDetail.downloadPdf}
-                  </button>
+                  <div style={{ display:'flex', gap:8 }}>
+                    {shareableTab && (
+                      <button onClick={()=>shareLink(shareableTab)} disabled={shareLoading} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.78rem', padding:'8px 18px' }}>
+                        {shareCopied
+                          ? d.dealDetail.copied
+                          : <>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>
+                              {activeShareToken ? d.dealDetail.copyShareLink : d.dealDetail.shareLink}
+                            </>
+                        }
+                      </button>
+                    )}
+                    <button onClick={()=>copyToClipboard(activeContent)} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.78rem', padding:'8px 18px' }}>
+                      {copied
+                        ? d.dealDetail.copied
+                        : <>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            {d.dealDetail.copy}
+                          </>
+                      }
+                    </button>
+                    <button onClick={()=>downloadPDF(activeTabDef.label, activeContent, `${deal.client_name}-${activeTab}.pdf`)} className="gl-btn gl-btn-primary" style={{ fontSize:'0.78rem', padding:'8px 18px' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      {d.dealDetail.downloadPdf}
+                    </button>
+                  </div>
                 )}
               </div>
+              {shareableTab && activeShareUrl && (
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, padding:'10px 28px', borderTop:'1px solid var(--border)', background:'var(--surface)', flexWrap:'wrap' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:'0.76rem', color:'var(--text-muted)', minWidth:0 }}>
+                    <span className="logo-blink" style={{ width:6, height:6, background:'var(--green)', borderRadius:'50%', display:'inline-block', boxShadow:'0 0 5px var(--green)', flexShrink:0 }}/>
+                    <span style={{ whiteSpace:'nowrap' }}>{d.dealDetail.shareLinkActive}</span>
+                    <code style={{ fontSize:'0.72rem', background:'var(--bg)', padding:'2px 8px', borderRadius:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{activeShareUrl}</code>
+                  </div>
+                  <button onClick={()=>revokeShareLink(shareableTab)} disabled={shareLoading} className="gl-btn gl-btn-ghost" style={{ fontSize:'0.72rem', padding:'5px 10px', color:'var(--red)' }}>
+                    {d.dealDetail.revokeLink}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
