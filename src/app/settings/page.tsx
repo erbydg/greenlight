@@ -38,6 +38,11 @@ export default function SettingsPage() {
   const [agencyError, setAgencyError] = useState<string | null>(null)
   const [agencySaved, setAgencySaved] = useState(false)
 
+  const [hasAccount, setHasAccount] = useState<boolean | null>(null)
+  const [teamInterested, setTeamInterested] = useState(false)
+  const [interestSubmitting, setInterestSubmitting] = useState(false)
+  const [interestError, setInterestError] = useState<string | null>(null)
+
   useEffect(() => {
     fetch('/api/team')
       .then(r => r.json())
@@ -54,7 +59,23 @@ export default function SettingsPage() {
         setAgencyLoading(false)
       })
       .catch(() => setAgencyLoading(false))
+    fetch('/api/plan-interest')
+      .then(r => { setHasAccount(r.ok); return r.ok ? r.json() : { plans: [] } })
+      .then(data => setTeamInterested((data.plans ?? []).includes('team')))
+      .catch(() => setHasAccount(false))
   }, [])
+
+  const handleTeamInterest = async () => {
+    setInterestSubmitting(true); setInterestError(null)
+    const res = await fetch('/api/plan-interest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: 'team' }),
+    })
+    if (res.ok) setTeamInterested(true)
+    else setInterestError(d.pricing.interestFailed)
+    setInterestSubmitting(false)
+  }
 
   const agencyDirty = agencyNameInput.trim() !== savedAgency.name
     || signatureNameInput.trim() !== savedAgency.signature_name
@@ -108,6 +129,12 @@ export default function SettingsPage() {
   }
 
   const totalCost = members.reduce((s, m) => s + m.monthly_cost, 0)
+
+  const pricingTiers = [
+    { key: 'basic', name: d.pricing.basicName, price: '€29', desc: d.pricing.basicDesc },
+    { key: 'team', name: d.pricing.teamName, price: '€79', desc: d.pricing.teamDesc },
+    { key: 'custom', name: d.pricing.customName, price: null, desc: d.pricing.customDesc },
+  ]
 
   return (
     <>
@@ -307,6 +334,50 @@ export default function SettingsPage() {
                 {d.settings.addMember}
               </button>
             )}
+          </div>
+        </div>
+
+        <div className="gl-card" id="pricing">
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 600 }}>{d.pricing.sectionTitle}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{d.pricing.sectionSub}</div>
+          </div>
+          <div style={{ padding: '16px 24px' }}>
+            <div style={{ background: 'var(--amber-bg)', border: '1px solid var(--amber-border)', borderRadius: 6, padding: '8px 12px', marginBottom: 16, fontSize: '0.75rem', fontWeight: 600, color: 'var(--amber)' }}>
+              {d.pricing.previewLabel}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              {pricingTiers.map(tier => (
+                <div key={tier.key} className="gl-card" style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column' }}>
+                  <div className="font-heading" style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 6 }}>{tier.name}</div>
+                  <div style={{ marginBottom: 4 }}>
+                    {tier.price
+                      ? <><span className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 600 }}>{tier.price}</span><span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{d.pricing.perMonth}</span></>
+                      : <span className="font-heading" style={{ fontSize: '1.1rem', fontWeight: 600 }}>{d.pricing.contactUs}</span>}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tier.desc}</div>
+
+                  {tier.key === 'team' && hasAccount !== false && (
+                    <div style={{ marginTop: 16 }}>
+                      <button
+                        onClick={handleTeamInterest}
+                        disabled={teamInterested || interestSubmitting || hasAccount === null}
+                        className="gl-btn gl-btn-ghost"
+                        style={{
+                          width: '100%', justifyContent: 'center', fontSize: '0.76rem', padding: '8px 12px',
+                          ...(teamInterested ? { background: 'var(--green-bg)', borderColor: 'var(--green-border)', color: 'var(--green)' } : {}),
+                        }}
+                      >
+                        {teamInterested ? d.pricing.interestConfirmed : interestSubmitting ? d.pricing.interestSubmitting : d.pricing.interestCta}
+                      </button>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-light)', marginTop: 6 }}>{d.pricing.interestNote}</div>
+                      {interestError && <div style={{ fontSize: '0.7rem', color: 'var(--red)', marginTop: 6 }}>{interestError}</div>}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>

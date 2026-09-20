@@ -7,6 +7,7 @@ const en = {
     settings: 'Settings',
     signOut: 'Sign out',
     trialBadge: 'Free during beta — full premium access',
+    futurePricing: 'View future pricing',
   },
   common: {
     cancel: 'Cancel',
@@ -384,6 +385,24 @@ const en = {
     seniorityMedior: 'Medior',
     senioritySenior: 'Senior',
   },
+  pricing: {
+    sectionTitle: 'Future pricing',
+    sectionSub: "What Greenlight will cost after the beta ends. Your account stays on free, full premium access until then.",
+    previewLabel: 'Preview — these prices only apply after the beta',
+    perMonth: '/mo',
+    basicName: 'Basic',
+    basicDesc: 'Solo',
+    teamName: 'Team',
+    teamDesc: 'Up to 10 people',
+    customName: 'Custom',
+    customDesc: 'More than 10 people',
+    contactUs: 'Contact us',
+    interestCta: 'Interested in the team plan? Let us know',
+    interestSubmitting: 'Sending…',
+    interestConfirmed: 'Interest submitted ✓',
+    interestNote: "No obligations — we'll only reach out once the team plan is available.",
+    interestFailed: 'Could not submit. Please try again.',
+  },
 }
 
 const nl: typeof en = {
@@ -393,6 +412,7 @@ const nl: typeof en = {
     settings: 'Instellingen',
     signOut: 'Afmelden',
     trialBadge: 'Gratis tijdens bèta — volledige premium-toegang',
+    futurePricing: 'Bekijk toekomstige prijzen',
   },
   common: {
     cancel: 'Annuleren',
@@ -769,6 +789,24 @@ const nl: typeof en = {
     seniorityJunior: 'Junior',
     seniorityMedior: 'Medior',
     senioritySenior: 'Senior',
+  },
+  pricing: {
+    sectionTitle: 'Toekomstige prijzen',
+    sectionSub: 'Wat Greenlight kost ná de bèta. Je account blijft tot dan gratis, met volledige premium-toegang.',
+    previewLabel: 'Preview — deze prijzen gelden pas ná de bèta',
+    perMonth: '/maand',
+    basicName: 'Basic',
+    basicDesc: 'Solo',
+    teamName: 'Team',
+    teamDesc: 'Tot 10 personen',
+    customName: 'Custom',
+    customDesc: 'Meer dan 10 personen',
+    contactUs: 'Neem contact op',
+    interestCta: 'Interesse in teamplan? Laat het weten',
+    interestSubmitting: 'Bezig met versturen…',
+    interestConfirmed: 'Interesse doorgegeven ✓',
+    interestNote: 'Geen verplichtingen — we nemen enkel contact op wanneer het teamplan beschikbaar is.',
+    interestFailed: 'Kon niet doorgeven. Probeer opnieuw.',
   },
 }
 
