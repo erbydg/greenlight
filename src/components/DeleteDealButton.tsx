@@ -22,8 +22,8 @@ export default function DeleteDealButton({
       onClick={handleClick}
       disabled={loading}
       title={title}
-      className="gl-btn gl-btn-ghost"
-      style={{ fontSize: '0.72rem', padding: '5px 10px', color: 'var(--red)', opacity: loading ? 0.6 : 1 }}
+      className="gl-btn gl-btn-ghost gl-btn-compact"
+      style={{ color: 'var(--red)', opacity: loading ? 0.6 : 1 }}
     >
       {loading ? '…' : label}
     </button>

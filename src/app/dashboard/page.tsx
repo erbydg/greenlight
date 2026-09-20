@@ -8,13 +8,14 @@ import { getServerDictionary } from '@/lib/i18n/server'
 import Nav from '@/components/Nav'
 import { ScoreRing, RiskBadge, StatusBadge } from '@/components/DealBadges'
 import DealStatusButton from '@/components/DealStatusButton'
+import PortfolioSection from '@/components/PortfolioCharts'
 import { createClient } from '@supabase/supabase-js'
 import type { Deal } from '@/types/deal'
 
 export default async function DashboardPage() {
   const agencyId = await getAgencyId()
   if (!agencyId) redirect('/login')
-  const { d } = await getServerDictionary()
+  const { d, locale } = await getServerDictionary()
 
   const svc = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
   const { data: agencyData } = await svc.from('agencies').select('plan, created_at').eq('id', agencyId).single()
@@ -78,7 +79,7 @@ export default async function DashboardPage() {
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{d.dashboard.sub}</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div className="gl-stats-grid" style={{ marginBottom: 32 }}>
           {[
             { label: d.dashboard.stats.totalDeals, value: totalDeals, sub: d.dashboard.stats.totalDealsSub },
             { label: d.dashboard.stats.avgMargin, value: `${avgMargin.toFixed(1)}%`, sub: d.dashboard.stats.avgMarginSub, color: avgMargin >= 30 ? 'var(--green)' : avgMargin >= 20 ? 'var(--amber)' : 'var(--red)' },
@@ -99,12 +100,14 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        <PortfolioSection deals={deals} d={d} locale={locale} />
+
         <div className="gl-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
             <div className="font-heading" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{d.dashboard.allDeals}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{d.dashboard.dealCount(totalDeals)}</div>
-              <Link href="/dashboard/completed" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'none' }}>{d.dashboard.completedLink}</Link>
+              <Link href="/dashboard/completed" className="gl-tap-link" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'none' }}>{d.dashboard.completedLink}</Link>
             </div>
           </div>
 
@@ -129,30 +132,30 @@ export default async function DashboardPage() {
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{d.dashboard.demoCaption}</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+              <div className="gl-deal-row-header" style={{ padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
                 {[d.dashboard.colClient, d.dashboard.colRetainer, d.dashboard.colMargin, d.dashboard.colRisk, d.dashboard.colStatus, '', ''].map((h, i) => (
                   <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                 ))}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '14px 24px', alignItems: 'center', background: 'var(--bg)' }}>
-                <div>
+              <div className="gl-deal-row" style={{ padding: '14px 24px', background: 'var(--bg)' }}>
+                <div className="gl-deal-client">
                   <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{DEMO_DEAL.client_name}</div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{DEMO_DEAL.industry} · {DEMO_DEAL.contract_duration}mo</div>
                 </div>
-                <div className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(DEMO_DEAL.monthly_retainer)}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="gl-deal-retainer font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(DEMO_DEAL.monthly_retainer)}</div>
+                <div className="gl-deal-margin">
                   <ScoreRing score={DEMO_DEAL.margin_score} />
                   <span className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--green)' }}>{DEMO_DEAL.margin_percent.toFixed(1)}%</span>
                 </div>
-                <RiskBadge level={DEMO_DEAL.scope_risk_level} d={d} />
-                <StatusBadge status={DEMO_DEAL.status} d={d} />
-                <span/>
-                <span style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>→</span>
+                <div className="gl-deal-risk"><RiskBadge level={DEMO_DEAL.scope_risk_level} d={d} /></div>
+                <div className="gl-deal-status"><StatusBadge status={DEMO_DEAL.status} d={d} /></div>
+                <span className="gl-deal-done"/>
+                <span className="gl-deal-arrow" style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>→</span>
               </div>
             </div>
           ) : (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+              <div className="gl-deal-row-header" style={{ padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
                 {[d.dashboard.colClient, d.dashboard.colRetainer, d.dashboard.colMargin, d.dashboard.colRisk, d.dashboard.colStatus, '', ''].map((h, i) => (
                   <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                 ))}
@@ -161,20 +164,20 @@ export default async function DashboardPage() {
                 const mp = deal.margin_percent ?? 0
                 const mc = mp >= 30 ? 'var(--green)' : mp >= 20 ? 'var(--amber)' : 'var(--red)'
                 return (
-                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 80px 100px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center', transition: 'background 0.12s' }}>
-                    <div>
+                  <div key={deal.id} className="gl-deal-row" style={{ padding: '14px 24px', borderBottom: '1px solid var(--border)', transition: 'background 0.12s' }}>
+                    <div className="gl-deal-client">
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{deal.client_name}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{deal.industry} · {deal.contract_duration}mo</div>
                     </div>
-                    <div className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(deal.monthly_retainer)}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="gl-deal-retainer font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(deal.monthly_retainer)}</div>
+                    <div className="gl-deal-margin">
                       <ScoreRing score={deal.margin_score} />
                       <span className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600, color: mc }}>{mp.toFixed(1)}%</span>
                     </div>
-                    <RiskBadge level={deal.scope_risk_level} d={d} />
-                    <StatusBadge status={deal.status} d={d} />
-                    <DealStatusButton dealId={deal.id} targetStatus="COMPLETED" label={d.dashboard.markDone} title={d.dashboard.markDoneTitle} />
-                    <Link href={`/deals/${deal.id}`} style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
+                    <div className="gl-deal-risk"><RiskBadge level={deal.scope_risk_level} d={d} /></div>
+                    <div className="gl-deal-status"><StatusBadge status={deal.status} d={d} /></div>
+                    <div className="gl-deal-done"><DealStatusButton dealId={deal.id} targetStatus="COMPLETED" label={d.dashboard.markDone} title={d.dashboard.markDoneTitle} /></div>
+                    <Link href={`/deals/${deal.id}`} className="gl-deal-arrow" style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
                   </div>
                 )
               })}

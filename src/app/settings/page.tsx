@@ -155,7 +155,7 @@ export default function SettingsPage() {
             {agencyLoading ? (
               <>
                 <Skel width="100%" height={38} radius={8} style={{ marginBottom: 14 }}/>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                <div className="gl-settings-pair" style={{ marginBottom: 20 }}>
                   <Skel width="100%" height={38} radius={8}/>
                   <Skel width="100%" height={38} radius={8}/>
                 </div>
@@ -171,7 +171,7 @@ export default function SettingsPage() {
                   placeholder={d.settings.agencyNamePlaceholder}
                 />
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 6 }}>
+                <div className="gl-settings-pair" style={{ marginBottom: 6 }}>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{d.settings.signatureName}</div>
                     <input
@@ -230,7 +230,7 @@ export default function SettingsPage() {
             {loading && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[0, 1, 2].map(i => (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 14, alignItems: 'center', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px' }}>
+                  <div key={i} className="gl-settings-member-row" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px' }}>
                     <div>
                       <Skel width={120} height={13} style={{ marginBottom: 6 }}/>
                       <Skel width={80} height={10}/>
@@ -259,7 +259,7 @@ export default function SettingsPage() {
             {!loading && members.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
                 {members.map(m => (
-                  <div key={m.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 14, alignItems: 'center', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px' }}>
+                  <div key={m.id} className="gl-settings-member-row" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px' }}>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{m.name}</div>
                       <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: 2 }}>{m.role}</div>
@@ -269,7 +269,7 @@ export default function SettingsPage() {
                       <div className="font-heading" style={{ fontSize: '0.95rem', fontWeight: 600 }}>€{m.monthly_cost.toLocaleString('nl-BE')}</div>
                       <div style={{ fontSize: '0.68rem', color: 'var(--text-light)' }}>/mo</div>
                     </div>
-                    <button onClick={() => handleDelete(m.id)} style={{ width: 28, height: 28, borderRadius: 5, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-light)', cursor: 'pointer', display: 'grid', placeItems: 'center', fontSize: 14 }}>×</button>
+                    <button onClick={() => handleDelete(m.id)} className="gl-icon-btn">×</button>
                   </div>
                 ))}
               </div>
@@ -278,7 +278,7 @@ export default function SettingsPage() {
             {adding && (
               <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--green)', marginBottom: 12 }}>{d.settings.newMember}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                <div className="gl-settings-pair" style={{ marginBottom: 10 }}>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{d.settings.name}</div>
                     <input className="gl-input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder={d.settings.namePlaceholder}/>
@@ -303,7 +303,7 @@ export default function SettingsPage() {
                   <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                     {d.settings.referenceCostsNote}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                  <div className="gl-cost-hints-grid">
                     {d.settings.costHints.map(h => (
                       <div key={h.label} onClick={() => setForm({...form, monthly_cost: String(h.total)})}
                         style={{ background: 'var(--surface)', border: '1px solid var(--amber-border)', borderRadius: 5, padding: '7px 10px', cursor: 'pointer' }}>
@@ -347,7 +347,7 @@ export default function SettingsPage() {
               {d.pricing.previewLabel}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            <div className="gl-pricing-grid">
               {pricingTiers.map(tier => (
                 <div key={tier.key} className="gl-card" style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column' }}>
                   <div className="font-heading" style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 6 }}>{tier.name}</div>

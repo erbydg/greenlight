@@ -26,8 +26,8 @@ export default function DealStatusButton({
       onClick={handleClick}
       disabled={loading}
       title={title}
-      className="gl-btn gl-btn-ghost"
-      style={{ fontSize: '0.72rem', padding: '5px 10px', opacity: loading ? 0.6 : 1, whiteSpace: 'nowrap' }}
+      className="gl-btn gl-btn-ghost gl-btn-compact"
+      style={{ opacity: loading ? 0.6 : 1, whiteSpace: 'nowrap' }}
     >
       {loading ? '…' : label}
     </button>

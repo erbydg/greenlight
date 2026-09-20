@@ -31,7 +31,7 @@ function CheckGrid({ label, items, selected, onChange }: { label:string; items:s
   return (
     <div style={{ marginBottom:20 }}>
       <div style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>{label}</div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+      <div className="gl-form-grid-2" style={{ gap:6 }}>
         {items.map(item => (
           <div key={item} className={`gl-check-item ${selected.includes(item)?'checked':''}`} onClick={()=>toggle(item)}>
             <div className="gl-check-box"/>{item}
@@ -143,7 +143,7 @@ function TeamSection({ form, upd, teamMembers, d }: { form: DealFormData; upd: (
                   <input type="number" className="gl-input" style={{ background:'transparent', border:'none', padding:0, fontSize:'0.84rem' }} value={role.hourlyCost||''}
                     onChange={e=>setQuickRoles(quickRoles.map((r,j)=>j===i?{...r,hourlyCost:Number(e.target.value)}:r))} placeholder="65"/>
                 </div>
-                <button type="button" onClick={()=>setQuickRoles(quickRoles.filter((_,j)=>j!==i))} style={{ width:28, height:28, borderRadius:5, background:'transparent', border:'1px solid var(--border)', color:'var(--text-light)', cursor:'pointer', display:'grid', placeItems:'center', fontSize:14 }}>×</button>
+                <button type="button" onClick={()=>setQuickRoles(quickRoles.filter((_,j)=>j!==i))} className="gl-icon-btn">×</button>
               </div>
             ))}
           </div>
@@ -170,7 +170,7 @@ function TeamSection({ form, upd, teamMembers, d }: { form: DealFormData; upd: (
               const cost = member.monthly_cost * (alloc.allocationPercent || 0) / 100
               return (
                 <div key={alloc.memberId} style={{ background:'var(--bg)', border:'1px solid var(--border)', borderRadius:8, padding:'12px 14px' }}>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 180px 80px 28px', gap:12, alignItems:'center' }}>
+                  <div className="gl-team-alloc-row">
                     <div>
                       <div style={{ fontWeight:600, fontSize:'0.85rem' }}>{member.name}</div>
                       <div style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:1 }}>{member.role} · €{member.monthly_cost.toLocaleString('nl-BE')}/mo</div>
@@ -188,7 +188,7 @@ function TeamSection({ form, upd, teamMembers, d }: { form: DealFormData; upd: (
                       <div className="font-heading" style={{ fontSize:'0.92rem', fontWeight:600, color:'var(--green)' }}>€{Math.round(cost).toLocaleString('nl-BE')}</div>
                       <div style={{ fontSize:'0.66rem', color:'var(--text-light)' }}>/mo</div>
                     </div>
-                    <button type="button" onClick={()=>setTeamAllocations(teamAllocations.filter((_,j)=>j!==i))} style={{ width:26, height:26, borderRadius:5, background:'transparent', border:'1px solid var(--border)', color:'var(--text-light)', cursor:'pointer', fontSize:13, display:'grid', placeItems:'center' }}>×</button>
+                    <button type="button" onClick={()=>setTeamAllocations(teamAllocations.filter((_,j)=>j!==i))} className="gl-icon-btn">×</button>
                   </div>
                   <div style={{ marginTop:10, height:3, background:'var(--border)', borderRadius:2, overflow:'hidden' }}>
                     <div style={{ height:'100%', background:(alloc.allocationPercent||20)>=70?'var(--amber)':'var(--green)', width:`${alloc.allocationPercent||20}%`, borderRadius:2, transition:'width 0.2s' }}/>
@@ -304,10 +304,10 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
     <>
       <Nav breadcrumbs={breadcrumbs} actions={<Link href={cancelHref} className="gl-btn gl-btn-ghost">{d.dealForm.cancel}</Link>}/>
       <form onSubmit={handleSubmit}>
-        <div style={{ maxWidth:1020, margin:'0 auto', padding:'40px', display:'grid', gridTemplateColumns:'1fr 320px', gap:24, alignItems:'start' }}>
+        <div className="gl-wizard-layout" style={{ maxWidth:1020, margin:'0 auto' }}>
           <div>
             <SectionBlock n={1} title={sections[0].title} sub={sections[0].sub} done={done[0]} isOpen={open.includes(1)} onToggle={()=>toggleSection(1)}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
+              <div className="gl-form-grid-2" style={{ marginBottom:14 }}>
                 <div>
                   <FieldLabel d={d}>{d.dealForm.clientName}</FieldLabel>
                   <input required className="gl-input" value={form.client_name} onChange={e=>upd('client_name',e.target.value)} placeholder={d.dealForm.clientNamePlaceholder}/>
@@ -320,7 +320,7 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
                   </select>
                 </div>
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+              <div className="gl-form-grid-3">
                 <div>
                   <FieldLabel d={d}>{d.dealForm.duration}</FieldLabel>
                   <select className="gl-select" value={form.contract_duration} onChange={e=>upd('contract_duration',Number(e.target.value))}>
@@ -344,7 +344,7 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
               </div>
               <div style={{ marginTop:14, paddingTop:14, borderTop:'1px solid var(--border)' }}>
                 <FieldLabel optional d={d}>{d.dealForm.monthlyAdBudget}</FieldLabel>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:10, alignItems:'start' }}>
+                <div className="gl-form-grid-adspend">
                   <div className="gl-prefix">
                     <span className="gl-prefix-sym">€</span>
                     <input type="number" min={0} className="gl-input" value={form.ad_spend||''} onChange={e=>upd('ad_spend',Number(e.target.value))} placeholder="2000"/>
@@ -393,7 +393,7 @@ export default function DealForm({ mode, dealId, initialForm }: { mode: 'create'
             {error && <div style={{ background:'var(--red-bg)', border:'1px solid var(--red-border)', borderRadius:8, padding:'12px 16px', fontSize:'0.82rem', color:'var(--red)', marginTop:10 }}>{error}</div>}
           </div>
 
-          <div style={{ display:'flex', flexDirection:'column', gap:14, position:'sticky', top:76 }}>
+          <div className="gl-wizard-sidebar" style={{ display:'flex', flexDirection:'column', gap:14 }}>
             <div className="gl-card" style={{ padding:16 }}>
               <div style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:12 }}>{d.dealForm.progress}</div>
               {sections.map((s,i) => (

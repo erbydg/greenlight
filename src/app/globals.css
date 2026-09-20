@@ -26,6 +26,11 @@
 
 html { font-size: 15px; scroll-behavior: smooth; }
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg);
   background-image: radial-gradient(circle, #ccc8bf 1px, transparent 1px);
@@ -34,6 +39,8 @@ body {
   font-family: 'Instrument Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+* { min-width: 0; }
 
 .font-heading { font-family: 'Fraunces', Georgia, serif; }
 
@@ -53,7 +60,24 @@ body {
   flex-shrink: 0;
 }
 
-.gl-nav { background: var(--surface); border-bottom: 1px solid var(--border); height: 56px; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+.gl-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 40px; position: sticky; top: 0; z-index: 40; }
+.gl-nav-row { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.gl-nav-links { display: flex; align-items: center; gap: 2px; }
+.gl-nav-crumbs { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+.gl-nav-right { display: flex; align-items: center; gap: 10px; }
+.gl-nav-hamburger { display: none; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; flex-shrink: 0; }
+.gl-nav-mobile-panel { display: flex; flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 20px 20px; border-top: 1px solid var(--border); background: var(--surface); }
+.gl-nav-mobile-link { padding: 11px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; text-decoration: none; min-height: 44px; display: flex; align-items: center; }
+.gl-nav-mobile-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+@media (max-width: 900px) {
+  .gl-nav { padding: 0 16px; }
+  .gl-nav-links, .gl-nav-crumbs, .gl-nav-right { display: none; }
+  .gl-nav-hamburger { display: flex; }
+}
+@media (min-width: 901px) {
+  .gl-nav-mobile-panel { display: none; }
+}
 .gl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .gl-badge { display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:20px; font-size:0.68rem; font-weight:600; border:1px solid; }
 .gl-badge-dot { width:5px; height:5px; border-radius:50%; }
@@ -119,10 +143,70 @@ body {
 .gl-add-btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; width:100%; border-radius:6px; border:1px dashed var(--border); background:transparent; color:var(--text-muted); font-family:'Instrument Sans',sans-serif; font-size:0.77rem; font-weight:500; cursor:pointer; transition:all 0.15s; }
 .gl-add-btn:hover { border-color:var(--green); color:var(--green); background:var(--green-bg); }
 
+.gl-icon-btn { width:28px; height:28px; flex-shrink:0; border-radius:5px; background:transparent; border:1px solid var(--border); color:var(--text-light); cursor:pointer; display:grid; place-items:center; font-size:14px; }
+.gl-btn-compact { font-size:0.72rem; padding:5px 10px; }
+.gl-tap-link { display:inline-flex; align-items:center; }
+.gl-locale-btn { padding:5px 9px; min-height:28px; }
+
+.gl-wizard-layout { display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start; padding:40px; }
+.gl-wizard-sidebar { position:sticky; top:76px; }
+.gl-form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.gl-form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.gl-form-grid-adspend { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:start; }
+.gl-team-alloc-row { display:grid; grid-template-columns:1fr 180px 80px 28px; gap:12px; align-items:center; }
+
+/* Deal row: flexbox with per-breakpoint widths so it can wrap into a stacked card on mobile without duplicating markup */
+.gl-deal-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.gl-deal-client { flex:1 1 240px; min-width:0; }
+.gl-deal-retainer { width:100px; flex-shrink:0; }
+.gl-deal-margin { width:100px; flex-shrink:0; display:flex; align-items:center; gap:8px; }
+.gl-deal-risk { width:90px; flex-shrink:0; }
+.gl-deal-status { width:80px; flex-shrink:0; }
+.gl-deal-done { width:100px; flex-shrink:0; }
+.gl-deal-action { width:100px; flex-shrink:0; }
+.gl-deal-arrow { width:32px; flex-shrink:0; text-align:right; }
+.gl-deal-row-header { display:flex; gap:12px; }
+.gl-deal-row-header > div:nth-child(1) { flex:1 1 240px; }
+.gl-deal-row-header > div:not(:first-child) { width:100px; flex-shrink:0; }
+
+/* Generic responsive grids reused across dashboard, deal detail, settings and portfolio charts */
+.gl-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.gl-deal-layout { display:grid; grid-template-columns:1fr 300px; gap:16px; }
+.gl-financial-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; }
+.gl-deliverables-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0; }
+.gl-settings-pair { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.gl-settings-member-row { display:grid; grid-template-columns:1fr auto auto auto; gap:14px; align-items:center; }
+.gl-cost-hints-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.gl-pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.gl-portfolio-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:12px; }
+
 @media (max-width: 768px) {
-  .gl-input, .gl-select, .gl-textarea { font-size: 16px; }
-  .gl-btn { padding: 11px 18px; font-size: 0.85rem; }
+  main { padding: 24px 16px !important; }
+  .gl-stats-grid { grid-template-columns: repeat(2,1fr); }
+  .gl-deal-layout, .gl-financial-grid, .gl-deliverables-grid, .gl-settings-pair, .gl-pricing-grid, .gl-portfolio-grid { grid-template-columns: 1fr; }
+  .gl-settings-member-row { grid-template-columns: 1fr auto; row-gap: 8px; }
+  .gl-cost-hints-grid { grid-template-columns: 1fr 1fr; }
+
+  .gl-input, .gl-select { font-size: 16px; min-height: 44px; }
+  .gl-textarea { font-size: 16px; }
+  .gl-btn { padding: 11px 18px; font-size: 0.85rem; min-height: 44px; }
+  .gl-btn-compact { font-size: 0.82rem; padding: 10px 14px; min-height: 44px; }
+  .gl-icon-btn { width: 44px; height: 44px; }
+  .gl-tap-link { min-height: 44px; padding: 10px 6px; margin: -10px -6px; }
+  .gl-locale-btn { padding: 11px 14px; min-height: 44px; }
   .gl-tab-btn { padding: 13px 16px; }
   .gl-check-box { width: 20px; height: 20px; }
   .gl-check-item { padding: 11px 12px; }
+
+  .gl-wizard-layout { grid-template-columns: 1fr; padding: 20px; gap: 16px; }
+  .gl-wizard-sidebar { position: static; }
+  .gl-form-grid-2, .gl-form-grid-3, .gl-form-grid-adspend { grid-template-columns: 1fr; }
+  .gl-team-entry, .gl-team-alloc-row { grid-template-columns: 1fr; gap: 10px; }
+
+  .gl-deal-row-header { display: none; }
+  .gl-deal-row { padding: 14px 16px !important; row-gap: 10px; }
+  .gl-deal-client { flex-basis: 100%; }
+  .gl-deal-retainer, .gl-deal-margin, .gl-deal-risk, .gl-deal-status { width: auto; }
+  .gl-deal-done, .gl-deal-action { width: auto; margin-left: auto; }
+  .gl-deal-arrow { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
 }

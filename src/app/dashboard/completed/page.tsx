@@ -52,7 +52,7 @@ export default async function CompletedDealsPage() {
             </div>
           ) : (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 100px 32px', gap: 12, padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
+              <div className="gl-deal-row-header" style={{ padding: '8px 24px', borderBottom: '1px solid var(--border)' }}>
                 {[d.completed.colClient, d.completed.colRetainer, d.completed.colMargin, d.completed.colRisk, '', '', ''].map((h, i) => (
                   <div key={i} style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                 ))}
@@ -61,20 +61,20 @@ export default async function CompletedDealsPage() {
                 const mp = deal.margin_percent ?? 0
                 const mc = mp >= 30 ? 'var(--green)' : mp >= 20 ? 'var(--amber)' : 'var(--red)'
                 return (
-                  <div key={deal.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 90px 100px 100px 32px', gap: 12, padding: '14px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
-                    <div>
+                  <div key={deal.id} className="gl-deal-row" style={{ padding: '14px 24px', borderBottom: '1px solid var(--border)' }}>
+                    <div className="gl-deal-client">
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2 }}>{deal.client_name}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{deal.industry} · {deal.contract_duration}mo</div>
                     </div>
-                    <div className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(deal.monthly_retainer)}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="gl-deal-retainer font-heading" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{formatEuro(deal.monthly_retainer)}</div>
+                    <div className="gl-deal-margin">
                       <ScoreRing score={deal.margin_score} />
                       <span className="font-heading" style={{ fontSize: '0.88rem', fontWeight: 600, color: mc }}>{mp.toFixed(1)}%</span>
                     </div>
-                    <RiskBadge level={deal.scope_risk_level} d={d} />
-                    <DealStatusButton dealId={deal.id} targetStatus="DRAFT" label={d.completed.reopen} title={d.completed.reopenTitle} />
-                    <DeleteDealButton dealId={deal.id} label={d.completed.delete} title={d.completed.deleteTitle} confirmMessage={d.completed.confirmDelete(deal.client_name)} />
-                    <Link href={`/deals/${deal.id}`} style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
+                    <div className="gl-deal-risk"><RiskBadge level={deal.scope_risk_level} d={d} /></div>
+                    <div className="gl-deal-action"><DealStatusButton dealId={deal.id} targetStatus="DRAFT" label={d.completed.reopen} title={d.completed.reopenTitle} /></div>
+                    <div className="gl-deal-action"><DeleteDealButton dealId={deal.id} label={d.completed.delete} title={d.completed.deleteTitle} confirmMessage={d.completed.confirmDelete(deal.client_name)} /></div>
+                    <Link href={`/deals/${deal.id}`} className="gl-deal-arrow" style={{ color: 'var(--text-light)', textDecoration: 'none', fontSize: '0.9rem' }}>→</Link>
                   </div>
                 )
               })}

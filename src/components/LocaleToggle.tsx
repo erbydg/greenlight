@@ -10,8 +10,8 @@ export default function LocaleToggle() {
         <button
           key={l}
           onClick={() => setLocale(l)}
+          className="gl-locale-btn"
           style={{
-            padding:'5px 9px',
             border:'none',
             cursor:'pointer',
             fontFamily:'inherit',

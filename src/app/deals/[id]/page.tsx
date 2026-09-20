@@ -42,7 +42,7 @@ function DealDetailSkeleton() {
         </div>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 300px', gap:16, marginBottom:16 }}>
+      <div className="gl-deal-layout" style={{ marginBottom:16 }}>
         <div>
           <div className="gl-card" style={{ marginBottom:12 }}>
             <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:20, alignItems:'center', padding:'22px 24px' }}>
@@ -56,7 +56,7 @@ function DealDetailSkeleton() {
               </div>
             </div>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:1, background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
+          <div className="gl-financial-grid" style={{ background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
             {[0,1,2].map(i => (
               <div key={i} style={{ background:'var(--surface)', padding:'16px 18px' }}>
                 <Skel width={80} height={10} style={{ marginBottom:10 }}/>
@@ -87,7 +87,7 @@ function DealDetailSkeleton() {
 
       <div className="gl-card" style={{ marginBottom:16 }}>
         <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}><Skel width={140} height={10}/></div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:0 }}>
+        <div className="gl-deliverables-grid">
           {[0,1,2,3,4].map(i => (
             <div key={i} style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
               <Skel width={90} height={9} style={{ marginBottom:10 }}/>
@@ -266,7 +266,7 @@ export default function DealDetailPage() {
           </div>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 300px', gap:16, marginBottom:16 }}>
+        <div className="gl-deal-layout" style={{ marginBottom:16 }}>
           <div>
             <div className="gl-card" style={{ marginBottom:12 }}>
               <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:20, alignItems:'center', padding:'22px 24px' }}>
@@ -287,7 +287,7 @@ export default function DealDetailPage() {
               </div>
             </div>
 
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:1, background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
+            <div className="gl-financial-grid" style={{ background:'var(--border)', border:'1px solid var(--border)', borderRadius:10, overflow:'hidden' }}>
               {[
                 { label:d.dealDetail.internalCost, value:formatEuro(deal.total_monthly_cost??0), sub:d.dealDetail.perMonth, green:false },
                 { label:d.dealDetail.grossMargin,  value:formatEuro(deal.gross_margin??0),       sub:d.dealDetail.perMonth, green:true  },
@@ -354,7 +354,7 @@ export default function DealDetailPage() {
           <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
             <span style={{ fontSize:'0.68rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{d.dealDetail.deliverablesPromises}</span>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:0 }}>
+          <div className="gl-deliverables-grid">
             {[
               { label:d.dealDetail.secDeliverables, items:[
                 ...deal.deliverables.paidAds, ...deal.deliverables.seo, ...deal.deliverables.creative,
