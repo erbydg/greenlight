@@ -4,14 +4,12 @@ import Link from 'next/link'
 import './landing.css'
 import { getServerDictionary } from '@/lib/i18n/server'
 import LocaleToggle from '@/components/LocaleToggle'
-import FreeCheckCalculator from '@/components/FreeCheckCalculator'
+
+const STEP_SCREENSHOTS = ['/demo-screenshots/step-1-input.png', '/demo-screenshots/step-2-result.png', '/demo-screenshots/step-3-document.png']
 
 export default async function LandingPage() {
   const { d } = await getServerDictionary()
   const t = d.landing
-  const mockTabs = ['Risk Analysis','Scope Lock','Handover','Kickoff']
-  const mockLines = ['100%','80%','100%','60%','100%','80%']
-  const mockMetrics: [string, string, string][] = [['Retainer','3.500','#1c1b18'],['Margin','55.4%','#16a34a'],['Health','87/100','#1c1b18']]
 
   return (
     <div className="lp-body">
@@ -26,7 +24,7 @@ export default async function LandingPage() {
           <span className="lp-logo-name">Greenlight</span>
         </a>
         <div className="lp-nav-links">
-          <a href="#free-check" className="lp-nav-link">{t.navFreeCheck}</a>
+          <Link href="/demo" className="lp-nav-link">{t.navDemo}</Link>
           <a href="#how" className="lp-nav-link">{t.navHow}</a>
           <Link href="/login" className="lp-nav-link">{t.navSignIn}</Link>
         </div>
@@ -56,8 +54,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <FreeCheckCalculator id="free-check"/>
-
       <section className="lp-pain">
         <div className="lp-pain-inner">
           <div>
@@ -79,72 +75,36 @@ export default async function LandingPage() {
         <div className="lp-section-label">{t.howLabel}</div>
         <h2 className="lp-section-title">{t.howTitle}</h2>
         <div className="lp-steps">
-          {t.steps.map(([n,ti,b]) => (
+          {t.steps.map(([n,ti,b], i) => (
             <div key={n} className="lp-step">
-              <div className="lp-step-num">{n}</div>
-              <div className="lp-step-title">{ti}</div>
-              <div className="lp-step-body">{b}</div>
+              <img src={STEP_SCREENSHOTS[i]} alt={ti} className="lp-step-img"/>
+              <div className="lp-step-body-wrap">
+                <div className="lp-step-num">{n}</div>
+                <div className="lp-step-title">{ti}</div>
+                <div className="lp-step-body">{b}</div>
+              </div>
             </div>
           ))}
         </div>
+        <Link href="/demo" className="lp-btn" style={{margin:'36px auto 0'}}>
+          {t.howCta}
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7.5 3.5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </Link>
       </section>
 
-      <section className="lp-demo-wrap">
-        <div className="lp-demo-inner">
-          <div>
-            <div className="lp-section-label">{t.getLabel}</div>
-            <h2 className="lp-demo-title">{t.getTitle}</h2>
-            <p className="lp-demo-sub">{t.getSub}</p>
-            <ul className="lp-feature-list">
-              {t.features.map(([ti,de]) => (
-                <li key={ti} className="lp-feature-item">
-                  <span className="lp-feature-check">&#10003;</span>
-                  <span><strong style={{color:'#fff'}}>{ti}</strong> — {de}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="lp-mock">
-            <div className="lp-mock-header">
-              <div className="lp-mock-dots">
-                <div className="lp-mock-dot" style={{background:'#ff5f57'}}/>
-                <div className="lp-mock-dot" style={{background:'#febc2e'}}/>
-                <div className="lp-mock-dot" style={{background:'#28c840'}}/>
-              </div>
-              <span style={{fontSize:'0.72rem',color:'#8a8780',fontWeight:500,marginLeft:4}}>Greenlight — {t.mockCompany}</span>
-            </div>
-            <div className="lp-mock-body">
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
-                <div>
-                  <div style={{fontFamily:'Fraunces,Georgia,serif',fontSize:'1rem',fontWeight:600,marginBottom:4}}>{t.mockCompany}</div>
-                  <div style={{fontSize:'0.72rem',color:'#8a8780'}}>{t.mockIndustryLine}</div>
-                </div>
-                <span style={{display:'inline-flex',alignItems:'center',gap:4,background:'#f0fdf4',border:'1px solid #bbf7d0',color:'#16a34a',fontSize:'0.62rem',fontWeight:600,padding:'2px 7px',borderRadius:10}}>
-                  <span style={{width:4,height:4,background:'#16a34a',borderRadius:'50%',display:'inline-block'}}/>{t.mockRisk}
-                </span>
-              </div>
-              <div className="lp-mock-metrics">
-                {mockMetrics.map(([l,v,c]) => (
-                  <div key={l} className="lp-mock-metric">
-                    <div className="lp-mock-metric-label">{l}</div>
-                    <div className="lp-mock-metric-val" style={{color:c}}>{v}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{height:5,background:'#f3f4f6',borderRadius:3,overflow:'hidden',marginBottom:14}}>
-                <div style={{height:'100%',background:'#16a34a',width:'87%',borderRadius:3}}/>
-              </div>
-              <div style={{border:'1px solid #e4e1db',borderRadius:8,overflow:'hidden'}}>
-                <div className="lp-mock-tabs">
-                  {mockTabs.map((t2,i) => <div key={t2} className={"lp-mock-tab"+(i===0?" active":"")}>{t2}</div>)}
-                </div>
-                <div className="lp-mock-doc">
-                  <div className="lp-mock-line" style={{background:'#bbf7d0',width:'40%',marginBottom:10}}/>
-                  {mockLines.map((w,i) => <div key={i} className="lp-mock-line" style={{width:w}}/>)}
-                </div>
-              </div>
-            </div>
-          </div>
+      <section className="lp-features-dark">
+        <div className="lp-features-dark-inner">
+          <div className="lp-section-label">{t.getLabel}</div>
+          <h2 className="lp-demo-title">{t.getTitle}</h2>
+          <p className="lp-demo-sub">{t.getSub}</p>
+          <ul className="lp-feature-list">
+            {t.features.map(([ti,de]) => (
+              <li key={ti} className="lp-feature-item">
+                <span className="lp-feature-check">&#10003;</span>
+                <span><strong style={{color:'#fff'}}>{ti}</strong> — {de}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

@@ -8,7 +8,7 @@ import type { getDictionary } from '@/lib/i18n/translations'
 import type { DealFormData, TeamMember } from '@/types/deal'
 import { calculateProfitability } from '@/lib/profitability'
 
-type Dict = ReturnType<typeof getDictionary>
+export type Dict = ReturnType<typeof getDictionary>
 
 const EMPTY: DealFormData = {
   client_name:'', industry:'', contract_duration:6, monthly_retainer:0, setup_fee:0,
@@ -18,7 +18,7 @@ const EMPTY: DealFormData = {
   kpi_promises:[], timeline_promises:[], verbal_promises:[], exclusions:[],
 }
 
-function FieldLabel({ children, optional, d }: { children: React.ReactNode; optional?: boolean; d: Dict }) {
+export function FieldLabel({ children, optional, d }: { children: React.ReactNode; optional?: boolean; d: Dict }) {
   return (
     <div style={{ fontSize:'0.72rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:5 }}>
       {children}{optional && <span style={{ fontWeight:400, color:'var(--text-light)', marginLeft:4 }}>{d.common.optional}</span>}
@@ -26,7 +26,7 @@ function FieldLabel({ children, optional, d }: { children: React.ReactNode; opti
   )
 }
 
-function CheckGrid({ label, items, selected, onChange }: { label:string; items:string[]; selected:string[]; onChange:(v:string[])=>void }) {
+export function CheckGrid({ label, items, selected, onChange }: { label:string; items:string[]; selected:string[]; onChange:(v:string[])=>void }) {
   const toggle = (item: string) => onChange(selected.includes(item) ? selected.filter(s=>s!==item) : [...selected,item])
   return (
     <div style={{ marginBottom:20 }}>
@@ -42,7 +42,7 @@ function CheckGrid({ label, items, selected, onChange }: { label:string; items:s
   )
 }
 
-function TagInput({ label, placeholder, values, onChange, optional, d }: { label:string; placeholder:string; values:string[]; onChange:(v:string[])=>void; optional?:boolean; d: Dict }) {
+export function TagInput({ label, placeholder, values, onChange, optional, d }: { label:string; placeholder:string; values:string[]; onChange:(v:string[])=>void; optional?:boolean; d: Dict }) {
   const [input, setInput] = useState('')
   const add = () => { const t=input.trim(); if(t){ onChange([...values,t]); setInput('') } }
   return (
@@ -65,7 +65,7 @@ function TagInput({ label, placeholder, values, onChange, optional, d }: { label
   )
 }
 
-function SectionBlock({ n, title, sub, done, isOpen, onToggle, children }: { n:number; title:string; sub:string; done:boolean; isOpen:boolean; onToggle:()=>void; children:React.ReactNode }) {
+export function SectionBlock({ n, title, sub, done, isOpen, onToggle, children }: { n:number; title:string; sub:string; done:boolean; isOpen:boolean; onToggle:()=>void; children:React.ReactNode }) {
   return (
     <div className="gl-card" style={{ marginBottom:10 }}>
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'18px 24px', cursor:'pointer', borderBottom:isOpen?'1px solid var(--border)':'none' }} onClick={onToggle}>
@@ -83,7 +83,7 @@ function SectionBlock({ n, title, sub, done, isOpen, onToggle, children }: { n:n
   )
 }
 
-function TeamSection({ form, upd, teamMembers, d }: { form: DealFormData; upd: (k: keyof DealFormData, v: any) => void; teamMembers: TeamMember[]; d: Dict }) {
+export function TeamSection({ form, upd, teamMembers, d }: { form: DealFormData; upd: (k: keyof DealFormData, v: any) => void; teamMembers: TeamMember[]; d: Dict }) {
   const [mode, setMode] = useState<'quick'|'team'>(form.team_roles.some(r=>r.mode==='team') ? 'team' : 'quick')
 
   const quickRoles = form.team_roles.filter(r => !r.mode || r.mode === 'quick')
